@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>HerCova — The distance between her and care</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="timing.js"></script>
+    <script src="assets/audio/words.js"></script>
+    <script src="assets/data/nigeria.js"></script>
+    <script src="assets/data/glyph7.js"></script>
+    <script src="assets/data/particles.js"></script>
+    <script src="assets/data/mb_particles.js"></script>
+    <style>
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-400.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-500.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-600.woff2") format("woff2"); font-weight: 600; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-700.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-800.woff2") format("woff2"); font-weight: 800; }
+      @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/jetbrains-mono-400.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/jetbrains-mono-500.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "JetBrains Mono"; src: url("assets/fonts/jetbrains-mono-700.woff2") format("woff2"); font-weight: 700; }
+
+      /* The website's own palette. No purple-900 / no dark grounds: the world is lilac. */
+      :root {
+        --p800: #3d1152; --p700: #52276e; --p600: #7b2fa8; --p400: #b98bd6; --p300: #c9a2ec; --p200: #e4d4f0; --p50: #f4edf9;
+        --ground: #f6f0fb; --white: #ffffff; --her: #ee7b1e;
+        --prose: #3f3646; --prose-soft: #6b6274;
+        --red: #d6483f; --red-soft: #fbe9e7; --red-ink: #b23a32; --green: #3f9142; --green-soft: #e7f3e7;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; overflow: hidden; background: var(--ground); }
+      body { font-family: "Open Sauce One", sans-serif; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; color: var(--p800); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ground); }
+      .clip { position: absolute; inset: 0; }
+      .fill { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .abs { position: absolute; }
+      .mono { font-family: "JetBrains Mono", monospace; }
+      svg { overflow: visible; }
+      .w { display: inline-block; }
+
+      /* ground */
+      #bg { background: #ffffff; overflow: hidden; }
+
+      /* 1 · heartbeat */
+      #label1 { position: absolute; left: 0; right: 0; top: 842px; text-align: center; font-size: 18px; font-weight: 500; letter-spacing: 0.42em; color: rgb(82 39 110 / 0.7); white-space: pre; }
+
+      /* 2 · her */
+      .photo { position: absolute; left: 1040px; top: 60px; width: 800px; height: 1000px; display: block; }
+      #subjectClip { position: absolute; inset: 0; clip-path: circle(0px at 960px 540px); }
+      #big7 { position: absolute; left: 780px; top: 170px; width: 523px; height: 760px; }
+      #timerChip { position: absolute; left: 1700px; top: 236px; padding: 12px 16px 10px; border-radius: 18px; background: rgb(255 255 255 / 0.72); box-shadow: 0 10px 30px -14px rgb(82 39 110 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.8); text-align: center; opacity: 0; }
+      #timerT { font-size: 30px; font-weight: 500; color: var(--p700); letter-spacing: 0.03em; font-variant-numeric: tabular-nums; }
+      #timerU { font-size: 11px; letter-spacing: 0.36em; color: rgb(82 39 110 / 0.6); margin-top: 2px; }
+
+      /* type (scenes 2–3) */
+      .ty { position: absolute; left: 0; top: 0; font-weight: 700; letter-spacing: -0.04em; line-height: 1; white-space: nowrap; transform-origin: 0 0; }
+      #tEvery { color: var(--p700); font-size: 130px; }
+      #tMinutes { color: var(--p800); font-size: 130px; }
+      #tMinutes .ch { display: inline-block; }
+      #tSub { font-size: 36px; font-weight: 500; letter-spacing: -0.01em; color: var(--p700); line-height: 1.2; }
+      #tSrc { font-size: 14px; font-weight: 500; letter-spacing: 0.26em; color: rgb(82 39 110 / 0.55); }
+      #tSrcRule { display: inline-block; width: 44px; height: 1px; background: rgb(82 39 110 / 0.45); vertical-align: middle; margin-right: 14px; transform-origin: left center; }
+
+      /* 5–7 · the line, the phone, the console */
+      #camB { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
+      #svgB { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; }
+      .device { position: absolute; }
+      #phone { left: 800px; top: -410px; width: 400px; height: 820px; border-radius: 62px; background: #ffffff; padding: 12px;
+        box-shadow: 0 50px 90px -60px rgb(82 39 110 / 0.4), inset 0 0 0 1.5px rgb(228 212 240 / 1), inset 0 0 0 7px #f3ecf9; }
+      #phoneScreen { position: relative; width: 100%; height: 100%; border-radius: 50px; overflow: hidden; background: #f9f5fc; }
+      #island { position: absolute; left: 50%; top: 12px; width: 108px; height: 30px; margin-left: -54px; border-radius: 20px; background: #221b29; z-index: 5; }
+      .status { position: absolute; left: 26px; right: 26px; top: 16px; display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: var(--p800); z-index: 4; }
+      #pScroll { position: absolute; left: 0; right: 0; top: 0; padding: 62px 18px 0; }
+      .pHead { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+      .pAvatar { width: 42px; height: 42px; border-radius: 50%; background: #fde6d3; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #c25f10; font-size: 17px; flex: none; }
+      .pHello { font-size: 13px; font-weight: 500; color: var(--prose-soft); }
+      .pName { font-size: 19px; font-weight: 700; color: var(--p800); letter-spacing: -0.02em; }
+      .card { background: #ffffff; border-radius: 22px; padding: 16px 16px; margin-bottom: 12px; box-shadow: 0 1px 0 rgb(228 212 240 / 0.9), 0 14px 30px -20px rgb(82 39 110 / 0.35); position: relative; overflow: hidden; }
+      .cap { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(82 39 110 / 0.55); }
+      .weekRow { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+      .weekBig { font-size: 40px; font-weight: 800; letter-spacing: -0.04em; color: var(--p700); line-height: 1; }
+      .weekSub { font-size: 12.5px; color: var(--prose-soft); margin-top: 6px; }
+      .q { font-size: 17px; font-weight: 700; color: var(--p800); letter-spacing: -0.015em; line-height: 1.25; margin-top: 6px; }
+      .chips { display: flex; gap: 10px; margin-top: 12px; }
+      .chip { flex: 1; text-align: center; padding: 11px 0; border-radius: 14px; font-size: 15px; font-weight: 700; color: var(--p700); background: var(--p50); box-shadow: inset 0 0 0 1.5px var(--p200); }
+      .chip.on { background: var(--p600); color: #fff; box-shadow: none; }
+      .ok { display: flex; align-items: center; gap: 10px; }
+      .okDot { width: 34px; height: 34px; border-radius: 50%; background: var(--p50); display: flex; align-items: center; justify-content: center; flex: none; }
+      .okT { font-size: 15px; font-weight: 700; color: var(--p800); }
+      .okS { font-size: 12.5px; color: var(--prose-soft); }
+      .guide { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+      .gIc { width: 30px; height: 30px; border-radius: 10px; background: var(--p50); display: flex; align-items: center; justify-content: center; flex: none; }
+      .gT { font-size: 14px; font-weight: 600; color: var(--prose); }
+      .danger { background: var(--red-soft); }
+      .dRow { display: flex; gap: 12px; align-items: center; }
+      .dIc { width: 38px; height: 38px; border-radius: 12px; background: var(--red); display: flex; align-items: center; justify-content: center; flex: none; }
+      .dT { font-size: 16px; font-weight: 700; color: var(--red-ink); }
+      .dS { font-size: 12.5px; color: #8a4a44; margin-top: 2px; }
+      #phoneScreen::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 52px; background: #f9f5fc; z-index: 3; }
+      .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 80px; padding: 11px 10px 0; background: #ffffff; box-shadow: 0 -1px 0 #efe6f6; display: flex; justify-content: space-around; z-index: 3; }
+      .tb { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; color: #a99bb5; }
+      .tb.on { color: #7b2fa8; }
+      .homeInd { position: absolute; left: 50%; bottom: 8px; width: 118px; height: 5px; margin-left: -59px; border-radius: 3px; background: #221b29; z-index: 4; }
+      .visit { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+      .vDate { width: 48px; height: 52px; border-radius: 14px; background: #f4edf9; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; }
+      .vDay { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; color: #7b2fa8; }
+      .vNum { font-size: 20px; font-weight: 800; color: #3d1152; line-height: 1.05; }
+      .vT { font-size: 15px; font-weight: 700; color: #3d1152; }
+      .vS { font-size: 12.5px; color: #6b6274; margin-top: 2px; }
+      .tipT { font-size: 14.5px; font-weight: 600; color: #3f3646; line-height: 1.35; margin-top: 6px; }
+      .dBar { margin-top: 16px; height: 6px; border-radius: 3px; background: rgb(214 72 63 / 0.16); overflow: hidden; }
+      #dBarFill { display: block; width: 100%; height: 100%; background: #d6483f; transform-origin: 0 50%; transform: scaleX(0); }
+      .dSteps { display: flex; justify-content: space-between; margin-top: 9px; font-size: 11.5px; font-weight: 700; color: rgb(178 58 50 / 0.42); }
+      .dSteps .on { color: #b23a32; }
+      #touch { position: absolute; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgb(123 47 168 / 0.22); box-shadow: 0 0 0 2px rgb(123 47 168 / 0.35); opacity: 0; z-index: 9; }
+      #touchRing { position: absolute; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; box-shadow: 0 0 0 2px rgb(123 47 168 / 0.45); opacity: 0; z-index: 9; }
+
+      #drawer { left: 3130px; top: -330px; width: 390px; height: 660px; border-radius: 26px; background: #ffffff; padding: 26px 26px; box-shadow: 0 60px 110px -70px rgb(82 39 110 / 0.42), inset 0 0 0 1.5px var(--p200); opacity: 0; }
+      .dwHead { display: flex; gap: 14px; align-items: center; }
+      .dwName { font-size: 22px; font-weight: 700; color: var(--p800); letter-spacing: -0.02em; }
+      .dwMeta { font-size: 14px; color: var(--prose-soft); margin-top: 2px; }
+      .dwStatus { margin-top: 20px; display: inline-flex; gap: 8px; align-items: center; padding: 9px 14px; border-radius: 999px; background: var(--p50); font-size: 14px; font-weight: 700; color: var(--p700); }
+      .dwDot { width: 8px; height: 8px; border-radius: 50%; background: var(--p600); }
+      .dwCap { margin-top: 28px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgb(82 39 110 / 0.55); }
+      .tlItem { display: flex; gap: 14px; align-items: flex-start; margin-top: 18px; position: relative; }
+      .tlItem + .tlItem::before { content: ""; position: absolute; left: 5px; top: -30px; width: 2px; height: 26px; background: #efe6f6; }
+      .tlDot { width: 12px; height: 12px; border-radius: 50%; background: var(--p600); margin-top: 5px; flex: none; }
+      .tlDot.red { background: var(--red); }
+      .tlDot.green { background: var(--green); }
+      .tlT { font-size: 16px; font-weight: 700; color: var(--p800); }
+      .tlS { font-size: 13.5px; color: var(--prose-soft); margin-top: 2px; }
+      .floatCard { position: absolute; background: #ffffff; border-radius: 22px; padding: 16px 20px 16px 16px; box-shadow: 0 30px 60px -34px rgb(82 39 110 / 0.45), inset 0 0 0 1.5px #efe6f6; opacity: 0; }
+      #floatOk { left: 1262px; top: -200px; width: 250px; }
+      #floatDanger { left: 1250px; top: -330px; width: 330px; background: #fbe9e7; box-shadow: 0 30px 60px -34px rgb(178 58 50 / 0.5), inset 0 0 0 1.5px #efc7c2; }
+      #console { left: 1910px; top: -360px; width: 1180px; height: 720px; border-radius: 26px; background: #ffffff; overflow: hidden;
+        box-shadow: 0 60px 110px -70px rgb(82 39 110 / 0.42), inset 0 0 0 1.5px var(--p200); }
+      .cBar { height: 46px; display: flex; align-items: center; padding: 0 18px; gap: 8px; border-bottom: 1px solid #f0e8f7; }
+      .cDot { width: 11px; height: 11px; border-radius: 50%; background: var(--p200); }
+      .cTitle { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--prose-soft); }
+      .cBody { display: flex; height: 674px; }
+      .cSide { width: 210px; padding: 20px 14px; border-right: 1px solid #f0e8f7; background: #fcfafe; }
+      .cBrand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 22px; font-size: 18px; font-weight: 700; color: var(--p600); letter-spacing: -0.02em; }
+      .nav { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--prose-soft); margin-bottom: 4px; }
+      .nav.on { background: var(--p50); color: var(--p700); }
+      .navBadge { margin-left: auto; min-width: 22px; height: 20px; border-radius: 10px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+      .cMain { flex: 1; padding: 26px 30px; position: relative; }
+      #cHead { height: 64px; }
+      .tiles { height: 128px; }
+      .tile { height: 128px; }
+      .qHead { height: 50px; padding: 0 18px !important; }
+      #btnClaim { position: absolute; right: 18px; top: 22px; height: 40px; min-width: 86px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+      .rRight { margin-right: 104px; }
+      #qList { overflow: hidden; }
+      .cH1 { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: var(--p800); }
+      .cDesc { font-size: 14px; color: var(--prose-soft); margin-top: 4px; }
+      .tiles { display: flex; gap: 14px; margin-top: 20px; }
+      .tile { flex: 1; border-radius: 18px; padding: 16px 18px; background: #fff; box-shadow: inset 0 0 0 1.5px #efe6f6; }
+      .tileTop { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--prose-soft); }
+      .tileIc { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+      .tileN { font-size: 40px; font-weight: 800; letter-spacing: -0.04em; margin-top: 8px; font-variant-numeric: tabular-nums; color: var(--p800); height: 44px; overflow: hidden; }
+      .tileN span { display: block; line-height: 44px; }
+      .queue { margin-top: 18px; border-radius: 18px; box-shadow: inset 0 0 0 1.5px #efe6f6; overflow: hidden; }
+      .qHead { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #f3edf8; }
+      .qTitle { font-size: 16px; font-weight: 700; color: var(--p800); }
+      .tabs { display: flex; gap: 6px; }
+      .tab { font-size: 12.5px; font-weight: 600; color: var(--prose-soft); padding: 6px 10px; border-radius: 10px; }
+      .tab.on { background: var(--p50); color: var(--p700); }
+      #qList { position: relative; height: 262px; }
+      .row { position: absolute; left: 0; right: 0; height: 84px; display: flex; align-items: center; gap: 14px; padding: 0 18px; border-bottom: 1px solid #f5f0f9; background: #fff; }
+      .rAv { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 17px; flex: none; }
+      .rName { font-size: 16px; font-weight: 700; color: var(--p800); }
+      .rMeta { font-size: 13px; color: var(--prose-soft); margin-top: 2px; }
+      .pill { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; padding: 5px 10px; border-radius: 999px; }
+      .pill.g { background: var(--green-soft); color: #2c6e2f; }
+      .pill.r { background: var(--red); color: #fff; }
+      .rRight { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+      .btn { font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 12px; background: var(--p600); color: #fff; }
+      .btn.claimed { background: var(--p50); color: var(--p700); box-shadow: inset 0 0 0 1.5px var(--p200); }
+      .ref { font-size: 12.5px; font-weight: 700; color: var(--p600); background: var(--p50); padding: 7px 12px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; }
+      #redGlow { position: absolute; left: 0; right: 0; top: 0; height: 84px; background: rgb(214 72 63 / 0.07); box-shadow: inset 4px 0 0 #d6483f; pointer-events: none; }
+      #toast { position: absolute; right: 22px; top: 18px; display: flex; gap: 12px; align-items: center; padding: 12px 18px 12px 12px; border-radius: 16px; background: #fff; box-shadow: 0 18px 40px -16px rgb(82 39 110 / 0.45), inset 0 0 0 1px #efe6f6; opacity: 0; }
+      #toastIc { width: 36px; height: 36px; border-radius: 11px; background: var(--red); display: flex; align-items: center; justify-content: center; }
+
+      /* HUD: cursor + speed streaks (screen space) */
+      #cursor { position: absolute; left: 0; top: 0; width: 34px; height: 44px; opacity: 0; filter: drop-shadow(0 6px 10px rgb(61 17 82 / 0.35)); z-index: 3; }
+      #clickRing { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; box-shadow: 0 0 0 2.5px rgb(123 47 168 / 0.6); opacity: 0; }
+      .streak { position: absolute; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgb(123 47 168 / 0), rgb(123 47 168 / 0.5), rgb(123 47 168 / 0)); }
+
+      /* 8 · she reaches care */
+      #mbImg { position: absolute; left: 551px; top: -78.4px; width: 824px; height: 1015px; display: block; opacity: 0;
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 100%), linear-gradient(to bottom, #000 86%, transparent 99%);
+        -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 100%), linear-gradient(to bottom, #000 86%, transparent 99%); mask-composite: intersect; }
+      #inTime { position: absolute; left: 96px; top: 520px; font-size: 118px; font-weight: 700; letter-spacing: -0.045em; color: var(--p600); white-space: nowrap; }
+      #reachLine { position: absolute; left: 104px; top: 462px; font-size: 38px; font-weight: 600; color: var(--p700); letter-spacing: -0.015em; white-space: nowrap; }
+
+      /* 9 · the promise */
+      .center { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+      #tagline { top: 672px; font-size: 64px; font-weight: 700; letter-spacing: -0.04em; color: var(--p800); white-space: nowrap; }
+      #tagline .w { margin: 0 0.12em; }
+      #tagline .w.accent { color: var(--p600); }
+      #domain { top: 800px; font-size: 20px; font-weight: 500; letter-spacing: 0.28em; color: rgb(82 39 110 / 0.7); }
+
+      /* frame system */
+      .hudT { position: absolute; font-size: 13px; font-weight: 500; letter-spacing: 0.32em; color: rgb(82 39 110 / 0.62); white-space: pre; }
+      #hudTL { left: 80px; top: 46px; }
+      #hudTR { right: 80px; top: 46px; text-align: right; }
+      #hudBL { left: 80px; bottom: 44px; }
+      .walk { position: absolute; left: 140px; font-size: 84px; font-weight: 700; letter-spacing: -0.045em; color: #52276e; white-space: nowrap; }
+      #walk1 { top: 150px; }
+      #walk2 { top: 246px; color: #7b2fa8; }
+      #pillars { position: absolute; left: 229px; top: -210px; }
+      .pl { position: absolute; left: 0; font-size: 70px; font-weight: 700; letter-spacing: -0.045em; color: #52276e; white-space: nowrap; opacity: 0; }
+      #pl1 { top: 0; } #pl2 { top: 84px; } #pl3 { top: 168px; } #pl4 { top: 252px; } #pl5 { top: 336px; color: #7b2fa8; }
+      .ovChip { position: absolute; font-size: 14px; font-weight: 500; letter-spacing: 0.26em; color: #52276e; background: #ffffff; padding: 9px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px #e4d4f0; white-space: nowrap; opacity: 0; }
+      /* film texture */
+      #grain { opacity: 0.1; mix-blend-mode: multiply; }
+
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-0xju" id="root" data-composition-id="main" data-start="0" data-duration="31" data-width="1920" data-height="1080">
+
+      <!-- GROUND · white, one lilac disc, the grid -->
+      <div data-hf-id="hf-j2xd" id="bg" class="clip" data-start="0" data-duration="31" data-track-index="0">
+        <svg data-hf-id="hf-clpl" id="bgShapes" class="fill" viewBox="0 0 1920 1080">
+          <circle data-hf-id="hf-2tsb" id="corner" cx="0" cy="1080" r="0" fill="#f4edf9" />
+          <circle data-hf-id="hf-f4n2" id="herDisc" cx="960" cy="540" r="0" fill="#efe3f8" />
+          <circle data-hf-id="hf-qe03" id="discRing1" cx="960" cy="540" r="0" fill="none" stroke="#e4d4f0" stroke-width="1.5" />
+          <circle data-hf-id="hf-0420" id="discRing2" cx="960" cy="540" r="0" fill="none" stroke="#e4d4f0" stroke-width="1.5" stroke-dasharray="3 11" />
+        </svg>
+        <canvas data-hf-id="hf-uivp" id="bgGrid" class="fill"></canvas>
+        <svg data-hf-id="hf-ej16" id="bgGeo" class="fill" viewBox="0 0 1920 1080" />
+        <svg data-hf-id="hf-fveg" id="bgRings" class="fill" viewBox="0 0 1920 1080" />
+      </div>
+
+      <!-- DUST · parallax specks and bokeh across every shot -->
+      <div data-hf-id="hf-jkjj" id="dustL" class="clip" data-start="0" data-duration="31" data-track-index="1"><canvas data-hf-id="hf-zycs" id="dust" class="fill"></canvas></div>
+
+      <!-- 1 · HEARTBEAT: one dot, her -->
+      <div data-hf-id="hf-c6ek" id="s1" class="clip" data-start="0" data-duration="3.7" data-track-index="2">
+       <div data-hf-id="hf-unba" id="rig1" class="fill">
+        <svg data-hf-id="hf-vmu1" id="svg1" class="fill" viewBox="0 0 1920 1080">
+
+          <g data-hf-id="hf-hqbw" id="clock1" />
+          <g data-hf-id="hf-jdyt" id="ripples1" />
+          <g data-hf-id="hf-5evv" id="dot1" transform="translate(960 540)">
+            <circle data-hf-id="hf-8iop" r="44" fill="#ffffff" stroke="#f1e6f9" stroke-width="2" />
+            <circle data-hf-id="hf-hz3v" id="dot1core" r="30" fill="#ee7b1e" />
+            <circle data-hf-id="hf-12ue" r="8" cx="-8" cy="-8" fill="#fff" opacity="0.7" />
+          </g>
+        </svg>
+        <div data-hf-id="hf-yb3g" id="label1" class="mono"></div>
+       </div>
+      </div>
+
+      <!-- 2 · HER: the photograph, the ring, the 7 behind her, and her stepping out of the frame -->
+      <div data-hf-id="hf-bpu6" id="s2" class="clip" data-start="2.55" data-duration="4.2" data-track-index="3">
+       <div data-hf-id="hf-qp79" id="rig2" class="fill">
+        <svg data-hf-id="hf-uxvp" id="ringBack" class="fill" viewBox="0 0 1920 1080" />
+        <svg data-hf-id="hf-g1ph" id="big7" viewBox="40 -775 560 790" aria-label="7">
+          
+          <path data-hf-id="hf-vfsa" id="big7fill" fill="#7b2fa8" opacity="0" />
+          <path data-hf-id="hf-4j01" id="big7stroke" fill="none" stroke="#7b2fa8" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" />
+        </svg>
+        <div data-hf-id="hf-3frt" id="subjectClip"><img data-hf-id="hf-0etk" id="photoSubject" class="photo" src="assets/images/graded/hero-subject.png" alt=""></div>
+        <svg data-hf-id="hf-6yq9" id="ringFront" class="fill" viewBox="0 0 1920 1080" />
+        <div data-hf-id="hf-i848" id="timerChip" class="mono"><div data-hf-id="hf-pcli" id="timerT">00:00</div><div data-hf-id="hf-u62y" id="timerU">MINUTES</div></div>
+       </div>
+      </div>
+
+      <!-- TYPE · "Every 7 minutes," — set behind her, then re-set beside the map -->
+      <div data-hf-id="hf-j6l7" id="typeL" class="clip" data-start="3.2" data-duration="6.4" data-track-index="4">
+       <div data-hf-id="hf-3smr" id="rigT" class="fill">
+        <div data-hf-id="hf-iut6" id="tEvery" class="ty"><span data-hf-id="hf-f2l1" id="tEveryIn" class="w">Every</span></div>
+        <div data-hf-id="hf-5ll4" id="tMinutes" class="ty"></div>
+        <div data-hf-id="hf-kvby" id="tSmall7" class="ty" style="font-size: 130px; color: #7b2fa8; opacity: 0">7</div>
+        <div data-hf-id="hf-4qzx" id="tSub" class="ty"></div>
+        <div data-hf-id="hf-kznh" id="tSrc" class="ty mono"><span data-hf-id="hf-dsrm" id="tSrcRule"></span>SOURCE · WHO AND PARTNERS, 2025</div>
+       </div>
+      </div>
+
+      <!-- 3–4 · ONE OF MANY: particles become Nigeria; then the dive -->
+      <div data-hf-id="hf-0hn5" id="s3" class="clip" data-start="6.18" data-duration="3.95" data-track-index="5">
+        <canvas data-hf-id="hf-0oiu" id="parts" class="fill"></canvas>
+        <svg data-hf-id="hf-wy9n" id="svg3" class="fill" viewBox="0 0 1920 1080">
+          <g data-hf-id="hf-t9an" id="cam3">
+            <path data-hf-id="hf-8u6d" id="outline3" fill="none" stroke="rgb(123 47 168 / 0.45)" stroke-linejoin="round" />
+            <circle data-hf-id="hf-64sf" id="lostRing" r="4.7" fill="none" stroke="rgb(82 39 110 / 0.75)" stroke-width="1.4" opacity="0" />
+            <circle data-hf-id="hf-ib3q" id="lostRipple" r="4.7" fill="none" stroke="rgb(82 39 110 / 0.5)" stroke-width="1.2" opacity="0" />
+            <g data-hf-id="hf-zmm7" id="her3"><circle data-hf-id="hf-oujg" r="7.5" fill="#ffffff" /><circle data-hf-id="hf-8z9y" r="4.74" fill="#ee7b1e" /></g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- 5–8 · THE LINE OF CARE, HER PORTAL, THE CARE-TEAM CONSOLE -->
+      <div data-hf-id="hf-7a7o" id="sB" class="clip" data-start="9.95" data-duration="15.75" data-track-index="6">
+        <div data-hf-id="hf-eytt" id="stageB" class="fill">
+          <div data-hf-id="hf-g2vw" id="camB">
+            <svg data-hf-id="hf-juqa" id="svgB">
+              <defs data-hf-id="hf-mh0t">
+                <filter data-hf-id="hf-66vv" id="glowB" x="-50%" y="-50%" width="200%" height="200%"><fegaussianblur data-hf-id="hf-m9t2" stdDeviation="8" /></filter>
+                <filter data-hf-id="hf-nvi2" id="glowWide" x="-100%" y="-100%" width="300%" height="300%"><fegaussianblur data-hf-id="hf-47wd" stdDeviation="18" /></filter>
+              </defs>
+              <g data-hf-id="hf-eaps" id="plates">
+                <circle data-hf-id="hf-9y7y" id="phonePlate" cx="1000" cy="20" r="0" fill="#f4edf9" />
+                <rect data-hf-id="hf-zbrp" id="consolePlate" x="1860" y="-410" width="1280" height="860" rx="64" fill="#f4edf9" opacity="0" />
+              </g>
+              <path data-hf-id="hf-10lf" id="lineAura" fill="none" stroke="#f1e6f9" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" />
+              <path data-hf-id="hf-1fuj" id="lineGlow" fill="none" stroke="#dcc6ef" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+              <path data-hf-id="hf-7xs5" id="lineCore" fill="none" stroke="#7b2fa8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+              <path data-hf-id="hf-8ajt" id="pulseGlow" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" filter="url(#glowB)" opacity="0" />
+              <path data-hf-id="hf-o8tz" id="pulseCore" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0" />
+              <g data-hf-id="hf-t2w9" id="sparks" />
+              <g data-hf-id="hf-0v2x" id="headB"><circle data-hf-id="hf-ve59" r="17" fill="#ffffff" stroke="#dcc6ef" stroke-width="2" /><circle data-hf-id="hf-h2nd" r="9" fill="#7b2fa8" /><circle data-hf-id="hf-zy7o" r="3.5" fill="#fff" /></g>
+              <path data-hf-id="hf-kfl8" id="phoneOutline" fill="none" stroke="#7b2fa8" stroke-width="2.5" stroke-linejoin="round" />
+              <path data-hf-id="hf-7hk5" id="consoleOutline" fill="none" stroke="#7b2fa8" stroke-width="2.5" stroke-linejoin="round" />
+              <g data-hf-id="hf-ye9z" id="sockets" />
+              <g data-hf-id="hf-4xb2" id="herB">
+                <circle data-hf-id="hf-awz7" r="46" fill="#ffffff" stroke="#f1e6f9" stroke-width="2" />
+                <circle data-hf-id="hf-ehh8" id="herFlashB" r="30" fill="none" stroke="#f6b27a" stroke-width="3" opacity="0" />
+                <circle data-hf-id="hf-yiv4" r="30" fill="#ee7b1e" />
+                <circle data-hf-id="hf-0zmh" r="8.5" cx="-8" cy="-8" fill="#fff" opacity="0.7" />
+              </g>
+            </svg>
+
+            <!-- "Watching, guiding, catching the warning signs early." — type in the world, beside her portal -->
+            <div data-hf-id="hf-rjrw" id="pillars">
+              <div data-hf-id="hf-ykk3" class="pl" id="pl1"><span data-hf-id="hf-162j" class="w">Watching,</span></div>
+              <div data-hf-id="hf-pwo8" class="pl" id="pl2"><span data-hf-id="hf-fibp" class="w">guiding,</span></div>
+              <div data-hf-id="hf-qoc1" class="pl" id="pl3"><span data-hf-id="hf-tid5" class="w">catching</span> <span data-hf-id="hf-9o0j" class="w">the</span></div>
+              <div data-hf-id="hf-i0g6" class="pl" id="pl4"><span data-hf-id="hf-f2is" class="w">warning</span> <span data-hf-id="hf-w2ha" class="w">signs</span></div>
+              <div data-hf-id="hf-lyk7" class="pl" id="pl5"><span data-hf-id="hf-5mbv" class="w">early.</span></div>
+            </div>
+
+            <!-- her HerCova portal -->
+            <div data-hf-id="hf-hskg" id="phone" class="device">
+              <div data-hf-id="hf-1ti3" id="phoneScreen">
+                <div data-hf-id="hf-i9du" id="island"></div>
+                <div data-hf-id="hf-8kim" class="status"><span data-hf-id="hf-zwmt">9:41</span><span data-hf-id="hf-3vid" class="mono" style="font-size: 12px; letter-spacing: 0.1em">●●● ▮</span></div>
+                <div data-hf-id="hf-v598" id="pScroll">
+                  <div data-hf-id="hf-h0ui" class="pHead" id="pHead">
+                    <div data-hf-id="hf-e1yu" class="pAvatar">A</div>
+                    <div data-hf-id="hf-yeow"><div data-hf-id="hf-ppwx" class="pHello">Good morning</div><div data-hf-id="hf-8c46" class="pName">Amaka</div></div>
+                  </div>
+                  <div data-hf-id="hf-ty03" class="card" id="cWeek">
+                    <div data-hf-id="hf-np54" class="cap">Your pregnancy</div>
+                    <div data-hf-id="hf-6yzs" class="weekRow">
+                      <div data-hf-id="hf-y7yw"><div data-hf-id="hf-aapg" class="weekBig">Week 28</div><div data-hf-id="hf-hj24" class="weekSub">Third trimester</div></div>
+                      <svg data-hf-id="hf-f56e" width="66" height="66" viewBox="0 0 66 66"><circle data-hf-id="hf-xm4w" cx="33" cy="33" r="27" fill="none" stroke="#efe6f6" stroke-width="7" /><circle data-hf-id="hf-3r6p" id="weekArc" cx="33" cy="33" r="27" fill="none" stroke="#7b2fa8" stroke-width="7" stroke-linecap="round" transform="rotate(-90 33 33)" /></svg>
+                    </div>
+                  </div>
+                  <div data-hf-id="hf-jlxt" class="card" id="cCheck">
+                    <div data-hf-id="hf-9o74" id="checkQ">
+                      <div data-hf-id="hf-u9vh" class="cap">Today's check-in</div>
+                      <div data-hf-id="hf-zx5l" class="q">Any bleeding, severe headache or swelling?</div>
+                      <div data-hf-id="hf-exrd" class="chips"><div data-hf-id="hf-z8ck" class="chip" id="chipNo">No</div><div data-hf-id="hf-pygp" class="chip">Yes</div></div>
+                    </div>
+                    <div data-hf-id="hf-zh6y" id="checkOk" class="ok abs" style="left: 16px; right: 16px; top: 22px; opacity: 0">
+                      <div data-hf-id="hf-wr0z" class="okDot"><svg data-hf-id="hf-44db" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-lym7" id="okTick" d="M5 12.5l4.5 4.5L19 7.5" /></svg></div>
+                      <div data-hf-id="hf-x11t"><div data-hf-id="hf-0bpi" class="okT">Checked in</div><div data-hf-id="hf-yz57" class="okS">No concern today</div></div>
+                    </div>
+                  </div>
+                  <div data-hf-id="hf-yijp" class="card" id="cGuide">
+                    <div data-hf-id="hf-sivf" class="cap">Guidance for week 28</div>
+                    <div data-hf-id="hf-ou5q" class="q">Know the danger signs</div>
+                    <div data-hf-id="hf-d5ps" class="guide"><div data-hf-id="hf-o5sn" class="gIc"><svg data-hf-id="hf-aoao" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-tm8x" d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></svg></div><div data-hf-id="hf-7iw1" class="gT">Bleeding</div></div>
+                    <div data-hf-id="hf-2oso" class="guide"><div data-hf-id="hf-9oif" class="gIc"><svg data-hf-id="hf-3fjs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-zbql" d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg></div><div data-hf-id="hf-8mua" class="gT">Severe headache, blurred vision</div></div>
+                    <div data-hf-id="hf-1hvl" class="guide"><div data-hf-id="hf-9a7e" class="gIc"><svg data-hf-id="hf-28mp" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle data-hf-id="hf-jnj3" cx="12" cy="8" r="4" /><path data-hf-id="hf-sfkh" d="M6 21a6 6 0 0 1 12 0" /></svg></div><div data-hf-id="hf-kt7i" class="gT">Baby moving less</div></div>
+                  </div>
+                  <div data-hf-id="hf-e8d5" class="card" id="cCheck2">
+                    <div data-hf-id="hf-4y4w" id="check2Q">
+                      <div data-hf-id="hf-zp9s" class="cap">Evening check-in</div>
+                      <div data-hf-id="hf-6bbq" class="q">Severe headache or blurred vision?</div>
+                      <div data-hf-id="hf-4dp9" class="chips"><div data-hf-id="hf-dnp9" class="chip">No</div><div data-hf-id="hf-oiku" class="chip" id="chipYes">Yes</div></div>
+                    </div>
+                    <div data-hf-id="hf-8l70" id="check2Danger" class="abs" style="left: 0; right: 0; top: 0; bottom: 0; padding: 16px; opacity: 0">
+                      <div data-hf-id="hf-w0w0" class="dRow">
+                        <div data-hf-id="hf-gfzo" class="dIc"><svg data-hf-id="hf-j8tk" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-81um" d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path data-hf-id="hf-mlkx" d="M12 9v4" /><path data-hf-id="hf-c2s1" d="M12 17h.01" /></svg></div>
+                        <div data-hf-id="hf-xfcu"><div data-hf-id="hf-kh2z" class="dT">Danger sign reported</div><div data-hf-id="hf-nzxt" class="dS" id="dangerSub">Alerting your care team…</div></div>
+                      </div>
+                      <div data-hf-id="hf-tpyr" class="dBar"><span data-hf-id="hf-8agm" id="dBarFill"></span></div>
+                      <div data-hf-id="hf-gzx1" class="dSteps"><span data-hf-id="hf-34wd" class="on">Reported</span><span data-hf-id="hf-96jz" id="dStep2">Care team alerted</span><span data-hf-id="hf-kn7a" id="dStep3">Referral</span></div>
+                    </div>
+                  </div>
+                  <div data-hf-id="hf-7m7k" class="card" id="cVisit">
+                    <div data-hf-id="hf-j4xw" class="cap">Next antenatal visit</div>
+                    <div data-hf-id="hf-91rt" class="visit"><div data-hf-id="hf-mw8i" class="vDate"><div data-hf-id="hf-fk5n" class="vDay">THU</div><div data-hf-id="hf-z9a3" class="vNum">14</div></div><div data-hf-id="hf-w8fr"><div data-hf-id="hf-9bhx" class="vT">10:00 · Kubwa PHC</div><div data-hf-id="hf-pzto" class="vS">With Nurse Grace</div></div></div>
+                  </div>
+                  <div data-hf-id="hf-yoz6" class="card" id="cTip">
+                    <div data-hf-id="hf-fr9a" class="cap">Today's tip</div>
+                    <div data-hf-id="hf-1gno" class="tipT">Rest on your left side and drink plenty of water.</div>
+                  </div>
+                </div>
+                <div data-hf-id="hf-vj8y" class="tabbar" id="tabbar">
+                  <div data-hf-id="hf-90nq" class="tb on"><svg data-hf-id="hf-cjp4" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-3azb" d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" /></svg>Home</div>
+                  <div data-hf-id="hf-qhiq" class="tb"><svg data-hf-id="hf-p8cw" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect data-hf-id="hf-bugr" x="5" y="4" width="14" height="17" rx="2" /><path data-hf-id="hf-xsfg" d="M9 4h6v3H9z" /><path data-hf-id="hf-r21g" d="M9 13.5l2 2 4-4" /></svg>Check-in</div>
+                  <div data-hf-id="hf-b2a0" class="tb"><svg data-hf-id="hf-o1ft" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-x3hq" d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path data-hf-id="hf-yljn" d="M4 21a2 2 0 0 1 2-2h13" /></svg>Learn</div>
+                  <div data-hf-id="hf-vg93" class="tb"><svg data-hf-id="hf-ofqu" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-1hjl" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>Care</div>
+                </div>
+                <div data-hf-id="hf-g3k8" class="homeInd"></div>
+                <div data-hf-id="hf-ktmq" id="touch"></div>
+                <div data-hf-id="hf-qb90" id="touchRing"></div>
+              </div>
+            </div>
+
+            <!-- cards that float out of her portal -->
+            <div data-hf-id="hf-9uhy" id="floatOk" class="floatCard"><div data-hf-id="hf-6kvy" class="ok"><div data-hf-id="hf-9df7" class="okDot"><svg data-hf-id="hf-glun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-s5bw" d="M5 12.5l4.5 4.5L19 7.5" /></svg></div><div data-hf-id="hf-wmqs"><div data-hf-id="hf-e3be" class="okT">Checked in</div><div data-hf-id="hf-jj2j" class="okS">No concern today</div></div></div></div>
+            <div data-hf-id="hf-z4kh" id="floatDanger" class="floatCard"><div data-hf-id="hf-h854" class="dRow"><div data-hf-id="hf-rjf0" class="dIc"><svg data-hf-id="hf-bsyo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-y7gi" d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path data-hf-id="hf-vvmd" d="M12 9v4" /><path data-hf-id="hf-v0jp" d="M12 17h.01" /></svg></div><div data-hf-id="hf-vftp"><div data-hf-id="hf-1v0b" class="dT">Danger sign reported</div><div data-hf-id="hf-d0p7" class="dS">Severe headache · Week 28</div></div></div></div>
+            <svg data-hf-id="hf-6jwx" id="floatLinks" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible"><path data-hf-id="hf-gc2h" id="linkOk" fill="none" stroke="#b98bd6" stroke-width="2" stroke-dasharray="4 8" /><path data-hf-id="hf-mz1m" id="linkDanger" fill="none" stroke="#d6483f" stroke-width="2" stroke-dasharray="4 8" /></svg>
+
+            <!-- her profile, sliding out beside the console when she is claimed -->
+            <div data-hf-id="hf-2hcb" id="drawer" class="device">
+              <div data-hf-id="hf-2e0l" class="dwHead"><div data-hf-id="hf-gbpv" class="rAv" style="background: #fde6d3; color: #c25f10; width: 56px; height: 56px; font-size: 21px">A</div><div data-hf-id="hf-vu4q"><div data-hf-id="hf-4uck" class="dwName">Amaka O.</div><div data-hf-id="hf-1tjx" class="dwMeta">Week 28 · Hausa</div></div></div>
+              <div data-hf-id="hf-qfuu" class="dwStatus" id="dwStatus"><span data-hf-id="hf-1dln" class="dwDot"></span><span data-hf-id="hf-36ee" id="dwStatusT">Claimed · Nurse Grace</span></div>
+              <div data-hf-id="hf-b2w5" class="dwCap">Her care</div>
+              <div data-hf-id="hf-mje5" class="tlItem"><span data-hf-id="hf-2dpy" class="tlDot"></span><div data-hf-id="hf-1043"><div data-hf-id="hf-m37s" class="tlT">Morning check-in</div><div data-hf-id="hf-mm2o" class="tlS">No concern</div></div></div>
+              <div data-hf-id="hf-7gbl" class="tlItem"><span data-hf-id="hf-vo4v" class="tlDot red"></span><div data-hf-id="hf-1ef4"><div data-hf-id="hf-q6z8" class="tlT">Evening check-in</div><div data-hf-id="hf-0y2o" class="tlS">Danger sign: severe headache</div></div></div>
+              <div data-hf-id="hf-8n8o" class="tlItem"><span data-hf-id="hf-d6ca" class="tlDot"></span><div data-hf-id="hf-c4s8"><div data-hf-id="hf-zquh" class="tlT">Care team alerted</div><div data-hf-id="hf-dvc8" class="tlS">Claimed by Nurse Grace</div></div></div>
+              <div data-hf-id="hf-5to6" class="tlItem" id="tlRef"><span data-hf-id="hf-hnfn" class="tlDot green"></span><div data-hf-id="hf-bqh7"><div data-hf-id="hf-23gr" class="tlT">Referred to care</div><div data-hf-id="hf-avl6" class="tlS">On her way</div></div></div>
+            </div>
+
+            <!-- the care-team console -->
+            <div data-hf-id="hf-gsf3" id="console" class="device">
+              <div data-hf-id="hf-mdve" class="cBar"><span data-hf-id="hf-u7bd" class="cDot"></span><span data-hf-id="hf-9ail" class="cDot"></span><span data-hf-id="hf-ahfo" class="cDot"></span><span data-hf-id="hf-ozpp" class="cTitle">HerCova Console · Overview</span></div>
+              <div data-hf-id="hf-iw2r" class="cBody">
+                <div data-hf-id="hf-e6sq" class="cSide" id="cSide">
+                  <div data-hf-id="hf-wgqm" class="cBrand"><svg data-hf-id="hf-svyb" width="22" height="44" viewBox="0 0 251 524"><path data-hf-id="hf-uzuy" fill="#7B2FA8" d="M163 8L174 15L191 31L191 33L197 38L197 40L201 43L201 45L213 60L231 97L237 116L242 141L243 184L240 204L228 242L214 272L202 304L194 334L188 373L188 417L192 444L203 479L215 502L224 513L222 516L219 516L216 513L216 511L200 493L170 448L156 415L150 385L150 352L156 317L164 290L166 288L190 218L198 187L203 154L203 115L194 66L187 46L178 29L171 22L171 20L161 12Z" /><path data-hf-id="hf-hoql" fill="#EE7B1E" d="M30 98L31 101L28 107L25 122L24 143L26 163L31 185L50 229L52 230L55 238L57 239L59 245L61 246L63 252L65 253L67 259L77 274L88 296L95 317L98 333L99 365L96 384L89 405L77 426L76 423L81 410L85 384L84 354L79 331L73 315L63 296L26 240L14 215L9 195L8 166L10 151L18 123ZM116 199L131 199L140 203L143 207L145 207L152 219L153 232L150 242L143 251L131 257L121 258L108 254L99 246L94 235L94 221L99 210L108 202Z" /></svg>HerCova</div>
+                  <div data-hf-id="hf-smy5" class="nav on"><svg data-hf-id="hf-l3ah" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect data-hf-id="hf-styp" x="3" y="3" width="7" height="9" rx="1.5" /><rect data-hf-id="hf-4ry3" x="14" y="3" width="7" height="5" rx="1.5" /><rect data-hf-id="hf-13nh" x="14" y="12" width="7" height="9" rx="1.5" /><rect data-hf-id="hf-68fn" x="3" y="16" width="7" height="5" rx="1.5" /></svg>Overview</div>
+                  <div data-hf-id="hf-57dc" class="nav"><svg data-hf-id="hf-9hb1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-6a25" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path data-hf-id="hf-mu5i" d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>Alerts<span data-hf-id="hf-y1hm" class="navBadge" id="navBadge">1</span></div>
+                  <div data-hf-id="hf-km05" class="nav"><svg data-hf-id="hf-ao84" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-frh1" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle data-hf-id="hf-nb88" cx="9" cy="7" r="4" /><path data-hf-id="hf-p3fz" d="M22 21v-2a4 4 0 0 0-3-3.87" /><path data-hf-id="hf-53jq" d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>Mothers</div>
+                  <div data-hf-id="hf-hrpx" class="nav"><svg data-hf-id="hf-a9x3" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-oj26" d="M9 11l3 3L22 4" /><path data-hf-id="hf-60le" d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>Screening</div>
+                  <div data-hf-id="hf-8cy5" class="nav"><svg data-hf-id="hf-bgu6" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-mieh" d="M3 3v18h18" /><path data-hf-id="hf-udtv" d="M7 15l4-4 3 3 5-6" /></svg>Analytics</div>
+                </div>
+                <div data-hf-id="hf-rqas" class="cMain">
+                  <div data-hf-id="hf-27ei" id="cHead"><div data-hf-id="hf-k26p" class="cH1">Overview</div><div data-hf-id="hf-1rmy" class="cDesc">Live maternal screening queue: claim danger flags as they arrive.</div></div>
+                  <div data-hf-id="hf-hovr" class="tiles">
+                    <div data-hf-id="hf-vja2" class="tile" id="tile0"><div data-hf-id="hf-8m67" class="tileTop"><span data-hf-id="hf-uqkl" class="tileIc" style="background: var(--red-soft)"><svg data-hf-id="hf-p2rx" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d6483f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-06ci" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path data-hf-id="hf-tl3w" d="M12 8v4" /><path data-hf-id="hf-lttk" d="M12 16h.01" /></svg></span>Unclaimed red flags</div><div data-hf-id="hf-g1yy" class="tileN"><span data-hf-id="hf-9iz0" id="n0">0</span></div></div>
+                    <div data-hf-id="hf-zhe3" class="tile" id="tile1"><div data-hf-id="hf-sq92" class="tileTop"><span data-hf-id="hf-prxe" class="tileIc" style="background: var(--p50)"><svg data-hf-id="hf-0phi" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-34fh" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect data-hf-id="hf-1qf4" x="8" y="2" width="8" height="4" rx="1" /></svg></span>Claimed</div><div data-hf-id="hf-7afy" class="tileN"><span data-hf-id="hf-mz5j" id="n1">0</span></div></div>
+                    <div data-hf-id="hf-olwg" class="tile" id="tile2"><div data-hf-id="hf-cb9i" class="tileTop"><span data-hf-id="hf-adex" class="tileIc" style="background: var(--green-soft)"><svg data-hf-id="hf-dhw7" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3f9142" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-8gds" d="M5 12h14" /><path data-hf-id="hf-gu9w" d="M12 5l7 7-7 7" /></svg></span>Referred to care</div><div data-hf-id="hf-7oqz" class="tileN"><span data-hf-id="hf-jem2" id="n2">0</span></div></div>
+                  </div>
+                  <div data-hf-id="hf-q04w" class="queue" id="queue">
+                    <div data-hf-id="hf-vy9f" class="qHead"><div data-hf-id="hf-chch" class="qTitle">Danger flags</div><div data-hf-id="hf-5rmk" class="tabs"><span data-hf-id="hf-2tfn" class="tab on">Unclaimed</span><span data-hf-id="hf-ykt3" class="tab">Claimed</span><span data-hf-id="hf-qp96" class="tab">Resolved</span></div></div>
+                    <div data-hf-id="hf-9r5m" id="qList">
+                      <div data-hf-id="hf-h1gs" class="row" id="rowA" style="top: 0">
+                        <div data-hf-id="hf-mzdl" id="redGlow"></div>
+                        <div data-hf-id="hf-dqx3" class="rAv" style="background: #fde6d3; color: #c25f10">A</div>
+                        <div data-hf-id="hf-bc66"><div data-hf-id="hf-eakl" class="rName">Amaka O.</div><div data-hf-id="hf-t6jv" class="rMeta">Week 28 · Danger sign: severe headache</div></div>
+                        <div data-hf-id="hf-acf0" class="rRight"><span data-hf-id="hf-35q1" class="pill r" id="pillA">RED FLAG</span><span data-hf-id="hf-04qq" class="ref" id="refA" style="opacity: 0"><svg data-hf-id="hf-nw80" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7b2fa8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-etvs" d="M5 12h14" /><path data-hf-id="hf-aqnw" d="M12 5l7 7-7 7" /></svg>Referred to care</span><span data-hf-id="hf-edu3" class="btn" id="btnClaim">Claim</span></div>
+                      </div>
+                      <div data-hf-id="hf-vg8b" class="row" id="rowB" style="top: 84px">
+                        <div data-hf-id="hf-0dbt" class="rAv" style="background: var(--p50); color: var(--p700)">Z</div>
+                        <div data-hf-id="hf-axv5"><div data-hf-id="hf-9vk6" class="rName">Zainab B.</div><div data-hf-id="hf-pkgn" class="rMeta">Week 24 · Checked in, no concern</div></div>
+                        <div data-hf-id="hf-kms4" class="rRight"><span data-hf-id="hf-pooa" class="pill g">GREEN</span></div>
+                      </div>
+                      <div data-hf-id="hf-656l" class="row" id="rowC" style="top: 168px">
+                        <div data-hf-id="hf-p8r1" class="rAv" style="background: var(--p50); color: var(--p700)">F</div>
+                        <div data-hf-id="hf-ajk4"><div data-hf-id="hf-ppr3" class="rName">Funke A.</div><div data-hf-id="hf-u8d9" class="rMeta">Week 31 · Checked in, no concern</div></div>
+                        <div data-hf-id="hf-jfv1" class="rRight"><span data-hf-id="hf-t2pa" class="pill g">GREEN</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div data-hf-id="hf-n5ua" id="toast"><div data-hf-id="hf-zyhy" id="toastIc"><svg data-hf-id="hf-tjtu" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-nb4x" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path data-hf-id="hf-5n6y" d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></div><div data-hf-id="hf-a593"><div data-hf-id="hf-c34s" style="font-size: 14px; font-weight: 700; color: var(--p800)">New red flag</div><div data-hf-id="hf-qkk3" style="font-size: 12.5px; color: var(--prose-soft)">Amaka O. · Week 28</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUD · cursor, click ring, speed streaks (screen space) -->
+      <div data-hf-id="hf-4ewx" id="hud" class="clip" data-start="10.9" data-duration="10.2" data-track-index="7">
+        <div data-hf-id="hf-ypxe" id="streaks"></div>
+        <svg data-hf-id="hf-245n" id="cursor" viewBox="0 0 24 31"><path data-hf-id="hf-g0nb" d="M2 2 L2 25 L8.2 19.2 L12.3 28.6 L16.1 27 L12 17.9 L20.4 17.6 Z" fill="#3d1152" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round" /></svg>
+        <div data-hf-id="hf-jsbp" id="clickRing"></div>
+      </div>
+
+      <!-- 8 · SHE REACHES CARE: mother and baby assemble out of halftone dots, cradled by the line -->
+      <div data-hf-id="hf-5hq2" id="s8" class="clip" data-start="22.45" data-duration="3.3" data-track-index="8">
+       <div data-hf-id="hf-75tr" id="rig8" class="fill">
+        <div data-hf-id="hf-1u40" id="mbWrap" class="fill">
+          <img data-hf-id="hf-fk3v" id="mbImg" src="assets/images/graded/vision-duo.png" alt="">
+          <canvas data-hf-id="hf-008x" id="mbDots" class="fill"></canvas>
+        </div>
+        <div data-hf-id="hf-izvo" id="reachLine"><span data-hf-id="hf-fjsh" class="w">And</span> <span data-hf-id="hf-22t6" class="w">she</span> <span data-hf-id="hf-hx4j" class="w">reaches</span> <span data-hf-id="hf-460v" class="w">care,</span></div>
+        <div data-hf-id="hf-jz73" id="inTime"><span data-hf-id="hf-gpzr" class="w">in</span> <span data-hf-id="hf-g5gt" class="w">time.</span></div>
+       </div>
+      </div>
+
+      <!-- 9 · THE PROMISE -->
+      <div data-hf-id="hf-z9io" id="s9" class="clip" data-start="25.45" data-duration="5.55" data-track-index="9">
+        <svg data-hf-id="hf-bugn" id="logoSvg" class="fill" viewBox="0 0 1920 1080">
+          <defs data-hf-id="hf-vl9d">
+            <mask data-hf-id="hf-q3ds" id="swooshMask" maskUnits="userSpaceOnUse" x="-100" y="-100" width="600" height="800">
+              <path data-hf-id="hf-673i" id="swooshDraw" d="M28 96 C 12 140 10 190 30 225 C 50 262 80 300 88 340 C 94 375 88 405 77 426" stroke="#fff" stroke-width="52" fill="none" stroke-linecap="round" />
+            </mask>
+            <lineargradient data-hf-id="hf-t4nb" id="sheenGrad" x1="0" y1="0" x2="1" y2="0"><stop data-hf-id="hf-2gjj" offset="0" stop-color="#fff" stop-opacity="0" /><stop data-hf-id="hf-ut95" offset="0.5" stop-color="#fff" stop-opacity="0.9" /><stop data-hf-id="hf-9zy0" offset="1" stop-color="#fff" stop-opacity="0" /></lineargradient>
+          </defs>
+          <g data-hf-id="hf-msat" id="lettersG" />
+          <g data-hf-id="hf-dynb" id="markG">
+            <path data-hf-id="hf-4e8d" id="markArc" fill="#7B2FA8" d="M163 8L174 15L191 31L191 33L197 38L197 40L201 43L201 45L213 60L231 97L237 116L242 141L243 184L240 204L228 242L214 272L202 304L194 334L188 373L188 417L192 444L203 479L215 502L224 513L222 516L219 516L216 513L216 511L200 493L170 448L156 415L150 385L150 352L156 317L164 290L166 288L190 218L198 187L203 154L203 115L194 66L187 46L178 29L171 22L171 20L161 12Z" />
+            <path data-hf-id="hf-yq4x" id="markSwoosh" mask="url(#swooshMask)" fill="#EE7B1E" d="M30 98L31 101L28 107L25 122L24 143L26 163L31 185L50 229L52 230L55 238L57 239L59 245L61 246L63 252L65 253L67 259L77 274L88 296L95 317L98 333L99 365L96 384L89 405L77 426L76 423L81 410L85 384L84 354L79 331L73 315L63 296L26 240L14 215L9 195L8 166L10 151L18 123Z" />
+            <path data-hf-id="hf-ev3u" id="markHead" fill="#EE7B1E" d="M116 199L131 199L140 203L143 207L145 207L152 219L153 232L150 242L143 251L131 257L121 258L108 254L99 246L94 235L94 221L99 210L108 202Z" />
+          </g>
+        </svg>
+        <div data-hf-id="hf-njx1" class="center" id="tagline"></div>
+        <div data-hf-id="hf-gmjr" class="center mono" id="domain">HERCOVAHEALTH.COM</div>
+        <canvas data-hf-id="hf-edz7" id="endMap" class="fill"></canvas>
+        <svg data-hf-id="hf-26cl" id="sigSvg" class="fill" viewBox="0 0 1920 1080"><path data-hf-id="hf-3zxa" id="sigLine" d="M700 772 C 820 760 1100 784 1220 770" fill="none" stroke="#7b2fa8" stroke-width="3" stroke-linecap="round" /><circle data-hf-id="hf-492x" id="sigDot" cx="1220" cy="770" r="6" fill="#ee7b1e" opacity="0" /></svg>
+      </div>
+
+      <!-- FRAME · wordmark, chapter, coordinates -->
+      <div data-hf-id="hf-ln9z" id="frame" class="clip" data-start="0" data-duration="31" data-track-index="22">
+        <div data-hf-id="hf-qexp" id="hudTL" class="mono hudT">HERCOVA</div>
+        <div data-hf-id="hf-ahod" id="hudTR" class="mono hudT"></div>
+        <div data-hf-id="hf-1nhh" id="hudBL" class="mono hudT">9.0820° N  ·  8.6753° E</div>
+      </div>
+
+      <!-- TYPE · "HerCova walks with her." -->
+      <div data-hf-id="hf-fmsv" id="walkType" class="clip" data-start="10.3" data-duration="2.3" data-track-index="23">
+        <div data-hf-id="hf-y34b" id="walk1" class="walk"><span data-hf-id="hf-2dbo" class="w">HerCova</span> <span data-hf-id="hf-wfku" class="w">walks</span></div>
+        <div data-hf-id="hf-n7mo" id="walk2" class="walk"><span data-hf-id="hf-vjqo" class="w">with</span> <span data-hf-id="hf-twwb" class="w">her.</span></div>
+      </div>
+
+
+      <!-- LABELS · the whole route, named -->
+      <div data-hf-id="hf-bx26" id="ovLabels" class="clip" data-start="20.95" data-duration="1.3" data-track-index="24">
+        <div data-hf-id="hf-mpxs" id="ovHer" class="ovChip mono">HER · WEEK 28</div>
+        <div data-hf-id="hf-e6m6" id="ovPhone" class="ovChip mono">HER PORTAL</div>
+        <div data-hf-id="hf-ppzj" id="ovConsole" class="ovChip mono">HER CARE TEAM</div>
+      </div>
+
+      <!-- FILM TEXTURE · rings, flash, grain, whip blur -->
+      <div data-hf-id="hf-2d9h" id="fx" class="clip" data-start="0" data-duration="31" data-track-index="10">
+        <svg data-hf-id="hf-hnir" id="bursts" class="fill" viewBox="0 0 1920 1080" />
+        <div data-hf-id="hf-0j6y" id="flash" class="fill" style="background: #ffffff; opacity: 0"></div>
+        <canvas data-hf-id="hf-1fyp" id="grain" class="fill"></canvas>
+        <svg data-hf-id="hf-6o47" width="0" height="0" style="position: absolute"><filter data-hf-id="hf-5ob4" id="whip" x="-10%" y="-10%" width="120%" height="120%"><fegaussianblur data-hf-id="hf-masy" id="whipNode" stdDeviation="0 0" /></filter></svg>
+      </div>
+
+      <!-- AUDIO:BEGIN -->
+      <hf-audio-group data-hf-id="hf-zead" id="voiceover" data-label="Voiceover" data-volume="1" data-fx-chain="{&quot;version&quot;:1,&quot;nodes&quot;:[{&quot;type&quot;:&quot;highpass&quot;,&quot;id&quot;:&quot;n1&quot;,&quot;label&quot;:&quot;Remove Rumble&quot;,&quot;params&quot;:{&quot;frequency&quot;:85,&quot;q&quot;:0.707}},{&quot;type&quot;:&quot;peaking&quot;,&quot;id&quot;:&quot;n2&quot;,&quot;label&quot;:&quot;Reduce Mud&quot;,&quot;params&quot;:{&quot;frequency&quot;:280,&quot;gain&quot;:-2,&quot;q&quot;:1.2}},{&quot;type&quot;:&quot;compressor&quot;,&quot;id&quot;:&quot;n3&quot;,&quot;label&quot;:&quot;Even Out Levels&quot;,&quot;params&quot;:{&quot;threshold&quot;:-22,&quot;ratio&quot;:2.6,&quot;attack&quot;:6,&quot;release&quot;:90}},{&quot;type&quot;:&quot;peaking&quot;,&quot;id&quot;:&quot;n4&quot;,&quot;label&quot;:&quot;Add Clarity&quot;,&quot;params&quot;:{&quot;frequency&quot;:3300,&quot;gain&quot;:2.2,&quot;q&quot;:1.1}},{&quot;type&quot;:&quot;highshelf&quot;,&quot;id&quot;:&quot;n5&quot;,&quot;label&quot;:&quot;Air&quot;,&quot;params&quot;:{&quot;frequency&quot;:10000,&quot;gain&quot;:1.6}}]}"></hf-audio-group>
+      <audio data-hf-id="hf-4qpe" id="vo1" src="assets/audio/mix/vo1.wav" data-audio-group="voiceover" data-start="3.3" data-duration="5.760" data-track-index="11" data-volume="1"></audio>
+      <audio data-hf-id="hf-gigj" id="vo2" src="assets/audio/mix/vo2.wav" data-audio-group="voiceover" data-start="10.55" data-duration="6.240" data-track-index="11" data-volume="1"></audio>
+      <audio data-hf-id="hf-gug1" id="vo3" src="assets/audio/mix/vo3.wav" data-audio-group="voiceover" data-start="17.25" data-duration="3.520" data-track-index="11" data-volume="1"></audio>
+      <audio data-hf-id="hf-vitp" id="vo4" src="assets/audio/mix/vo4.wav" data-audio-group="voiceover" data-start="22.2" data-duration="2.720" data-track-index="11" data-volume="1"></audio>
+      <audio data-hf-id="hf-tmm7" id="vo5" src="assets/audio/mix/vo5.wav" data-audio-group="voiceover" data-start="26.3" data-duration="2.880" data-track-index="11" data-volume="1"></audio>
+      <audio data-hf-id="hf-tbb1" id="music-bed" src="assets/audio/mix/music.wav" data-start="2.62" data-duration="28.380" data-track-index="12" data-volume="0.5" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0},{&quot;t&quot;:0.33,&quot;v&quot;:0.62},{&quot;t&quot;:0.68,&quot;v&quot;:0.3},{&quot;t&quot;:1.2,&quot;v&quot;:0.62},{&quot;t&quot;:6.44,&quot;v&quot;:0.3},{&quot;t&quot;:7.04,&quot;v&quot;:0.62},{&quot;t&quot;:7.58,&quot;v&quot;:0.62},{&quot;t&quot;:7.93,&quot;v&quot;:0.3},{&quot;t&quot;:14.17,&quot;v&quot;:0.3},{&quot;t&quot;:14.28,&quot;v&quot;:0.62},{&quot;t&quot;:14.63,&quot;v&quot;:0.3},{&quot;t&quot;:14.77,&quot;v&quot;:0.62},{&quot;t&quot;:18.15,&quot;v&quot;:0.3},{&quot;t&quot;:18.75,&quot;v&quot;:0.62},{&quot;t&quot;:19.23,&quot;v&quot;:0.62},{&quot;t&quot;:19.58,&quot;v&quot;:0.24},{&quot;t&quot;:22.3,&quot;v&quot;:0.24},{&quot;t&quot;:22.8,&quot;v&quot;:0.95},{&quot;t&quot;:23.33,&quot;v&quot;:0.9},{&quot;t&quot;:23.68,&quot;v&quot;:0.3},{&quot;t&quot;:26.58,&quot;v&quot;:0.3},{&quot;t&quot;:26.78,&quot;v&quot;:0.7},{&quot;t&quot;:27.08,&quot;v&quot;:0.75},{&quot;t&quot;:28.33,&quot;v&quot;:0}]}]}"></audio>
+      <audio data-hf-id="hf-5wfj" id="sfx-00-heartbeat" src="assets/audio/mix/sfx-heartbeat.wav" data-audio-group="sfx" data-start="0.350" data-duration="4.000" data-track-index="13" data-volume="0.55"></audio><!-- the heartbeat -->
+      <audio data-hf-id="hf-ixyw" id="sfx-01-ignite" src="assets/audio/mix/sfx-ignite.wav" data-audio-group="sfx" data-start="0.431" data-duration="1.760" data-track-index="14" data-volume="0.5"></audio><!-- her dot ignites -->
+      <audio data-hf-id="hf-map2" id="sfx-02-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="0.591" data-duration="1.280" data-track-index="15" data-volume="0.16"></audio><!-- clock rings open -->
+      <audio data-hf-id="hf-vbmh" id="sfx-03-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="1.000" data-duration="1.280" data-track-index="16" data-volume="0.2"></audio><!-- label decodes -->
+      <audio data-hf-id="hf-kuyd" id="sfx-04-ripple" src="assets/audio/mix/sfx-ripple.wav" data-audio-group="sfx" data-start="1.374" data-duration="1.600" data-track-index="17" data-volume="0.22"></audio><!-- ripple -->
+      <audio data-hf-id="hf-t3no" id="sfx-05-iris" src="assets/audio/mix/sfx-iris.wav" data-audio-group="sfx" data-start="2.540" data-duration="1.760" data-track-index="14" data-volume="0.62"></audio><!-- the dot irises open into her photograph -->
+      <audio data-hf-id="hf-jq8v" id="sfx-06-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="2.640" data-duration="0.366" data-track-index="15" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-shzy" id="sfx-07-ripple" src="assets/audio/mix/sfx-ripple.wav" data-audio-group="sfx" data-start="2.749" data-duration="1.600" data-track-index="16" data-volume="0.2"></audio><!-- ripple -->
+      <audio data-hf-id="hf-fagv" id="sfx-08-typehit" src="assets/audio/mix/sfx-typehit.wav" data-audio-group="sfx" data-start="3.240" data-duration="1.600" data-track-index="15" data-volume="0.42"></audio><!-- "Every" -->
+      <audio data-hf-id="hf-r5d7" id="sfx-09-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="3.360" data-duration="0.575" data-track-index="17" data-volume="0.4"></audio><!-- she steps out of the frame -->
+      <audio data-hf-id="hf-1s0z" id="sfx-10-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="3.440" data-duration="0.720" data-track-index="18" data-volume="0.28"></audio><!-- pop-out burst -->
+      <audio data-hf-id="hf-dq6b" id="sfx-11-typehit" src="assets/audio/mix/sfx-typehit.wav" data-audio-group="sfx" data-start="3.667" data-duration="1.600" data-track-index="19" data-volume="0.58"></audio><!-- "7" punch-in -->
+      <audio data-hf-id="hf-y54b" id="sfx-12-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="4.050" data-duration="1.200" data-track-index="17" data-volume="0.32"></audio><!-- "minutes," rises -->
+      <audio data-hf-id="hf-g24v" id="sfx-13-tickrun" src="assets/audio/mix/sfx-tickrun.wav" data-audio-group="sfx" data-start="4.350" data-duration="2.200" data-track-index="13" data-volume="0.42"></audio><!-- the clock ring laps seven times -->
+      <audio data-hf-id="hf-p7nx" id="sfx-14-tick" src="assets/audio/mix/sfx-tick.wav" data-audio-group="sfx" data-start="6.100" data-duration="0.600" data-track-index="14" data-volume="0.5"></audio><!-- 07:00 -->
+      <audio data-hf-id="hf-2ryn" id="sfx-15-dissolve" src="assets/audio/mix/sfx-dissolve.wav" data-audio-group="sfx" data-start="6.160" data-duration="2.760" data-track-index="15" data-volume="0.62"></audio><!-- her photograph becomes particles -->
+      <audio data-hf-id="hf-s51d" id="sfx-16-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="6.260" data-duration="0.366" data-track-index="16" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-ztj3" id="sfx-17-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="6.290" data-duration="1.200" data-track-index="17" data-volume="0.28"></audio><!-- type re-sets -->
+      <audio data-hf-id="hf-bf27" id="sfx-18-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="7.620" data-duration="0.366" data-track-index="13" data-volume="0.25"></audio><!-- source line -->
+      <audio data-hf-id="hf-6vx4" id="sfx-19-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="8.050" data-duration="1.280" data-track-index="13" data-volume="0.3"></audio><!-- particles land as Nigeria -->
+      <audio data-hf-id="hf-6w5a" id="sfx-20-lowhit" src="assets/audio/mix/sfx-lowhit.wav" data-audio-group="sfx" data-start="8.610" data-duration="2.560" data-track-index="14" data-volume="0.55"></audio><!-- one dot goes dark -->
+      <audio data-hf-id="hf-x7n1" id="sfx-21-dive" src="assets/audio/mix/sfx-dive.wav" data-audio-group="sfx" data-start="9.050" data-duration="1.480" data-track-index="15" data-volume="0.62"></audio><!-- the dive -->
+      <audio data-hf-id="hf-ef7w" id="sfx-22-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="10.020" data-duration="0.366" data-track-index="13" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-ucgw" id="sfx-23-zip" src="assets/audio/mix/sfx-zip.wav" data-audio-group="sfx" data-start="10.030" data-duration="1.600" data-track-index="16" data-volume="0.55"></audio><!-- the line of care races in -->
+      <audio data-hf-id="hf-ltc6" id="sfx-24-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="10.450" data-duration="1.200" data-track-index="13" data-volume="0.24"></audio><!-- "HerCova walks with her." rises -->
+      <audio data-hf-id="hf-cwlr" id="sfx-25-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="11.050" data-duration="1.200" data-track-index="15" data-volume="0.38"></audio><!-- pan to her phone -->
+      <audio data-hf-id="hf-gfmp" id="sfx-26-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="11.502" data-duration="0.575" data-track-index="14" data-volume="0.18"></audio><!-- "with her." streaks in -->
+      <audio data-hf-id="hf-xza7" id="sfx-27-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="11.780" data-duration="0.575" data-track-index="13" data-volume="0.34"></audio><!-- the line draws the phone -->
+      <audio data-hf-id="hf-y04n" id="sfx-28-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="11.850" data-duration="0.720" data-track-index="16" data-volume="0.3"></audio><!-- the line plugs in -->
+      <audio data-hf-id="hf-4ggw" id="sfx-29-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="11.850" data-duration="0.575" data-track-index="17" data-volume="0.42"></audio><!-- phone rises -->
+      <audio data-hf-id="hf-beqm" id="sfx-30-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="11.920" data-duration="0.366" data-track-index="18" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-hgxy" id="sfx-31-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="12.150" data-duration="0.720" data-track-index="14" data-volume="0.2"></audio><!-- header -->
+      <audio data-hf-id="hf-v4k0" id="sfx-32-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="12.240" data-duration="0.720" data-track-index="19" data-volume="0.2"></audio><!-- week card -->
+      <audio data-hf-id="hf-adhz" id="sfx-33-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="12.330" data-duration="0.720" data-track-index="15" data-volume="0.2"></audio><!-- check-in card -->
+      <audio data-hf-id="hf-bs4v" id="sfx-34-tick" src="assets/audio/mix/sfx-tick.wav" data-audio-group="sfx" data-start="12.450" data-duration="0.600" data-track-index="13" data-volume="0.18"></audio><!-- week counter -->
+      <audio data-hf-id="hf-jph8" id="sfx-35-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="12.492" data-duration="0.575" data-track-index="17" data-volume="0.2"></audio><!-- "Watching," streaks in -->
+      <audio data-hf-id="hf-veyj" id="sfx-36-click" src="assets/audio/mix/sfx-click.wav" data-audio-group="sfx" data-start="12.940" data-duration="0.480" data-track-index="14" data-volume="0.55"></audio><!-- tap: No -->
+      <audio data-hf-id="hf-urqx" id="sfx-37-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="13.250" data-duration="0.575" data-track-index="13" data-volume="0.2"></audio><!-- "guiding," streaks in -->
+      <audio data-hf-id="hf-z6cf" id="sfx-38-pages" src="assets/audio/mix/sfx-pages.wav" data-audio-group="sfx" data-start="13.310" data-duration="1.080" data-track-index="15" data-volume="0.4"></audio><!-- guidance -->
+      <audio data-hf-id="hf-xfws" id="sfx-39-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="13.400" data-duration="1.200" data-track-index="16" data-volume="0.3"></audio><!-- the check-in floats out -->
+      <audio data-hf-id="hf-f001" id="sfx-40-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="13.430" data-duration="1.280" data-track-index="14" data-volume="0.25"></audio><!-- checked in -->
+      <audio data-hf-id="hf-e5df" id="sfx-41-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="14.563" data-duration="0.575" data-track-index="13" data-volume="0.18"></audio><!-- "catching the" streaks in -->
+      <audio data-hf-id="hf-kin2" id="sfx-42-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="14.620" data-duration="0.575" data-track-index="15" data-volume="0.3"></audio><!-- scroll -->
+      <audio data-hf-id="hf-dhua" id="sfx-43-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="15.130" data-duration="0.575" data-track-index="14" data-volume="0.2"></audio><!-- "warning signs" streaks in -->
+      <audio data-hf-id="hf-9o8w" id="sfx-44-click" src="assets/audio/mix/sfx-click.wav" data-audio-group="sfx" data-start="15.350" data-duration="0.480" data-track-index="13" data-volume="0.58"></audio><!-- tap: Yes -->
+      <audio data-hf-id="hf-blsq" id="sfx-45-ripple" src="assets/audio/mix/sfx-ripple.wav" data-audio-group="sfx" data-start="15.720" data-duration="1.600" data-track-index="14" data-volume="0.5"></audio><!-- danger sign reported -->
+      <audio data-hf-id="hf-si6n" id="sfx-46-lowhit" src="assets/audio/mix/sfx-lowhit.wav" data-audio-group="sfx" data-start="15.720" data-duration="2.560" data-track-index="15" data-volume="0.22"></audio><!-- danger sub -->
+      <audio data-hf-id="hf-xgr0" id="sfx-47-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="15.840" data-duration="0.575" data-track-index="13" data-volume="0.36"></audio><!-- the danger card floats out -->
+      <audio data-hf-id="hf-uqsn" id="sfx-48-zip" src="assets/audio/mix/sfx-zip.wav" data-audio-group="sfx" data-start="16.020" data-duration="1.600" data-track-index="16" data-volume="0.5"></audio><!-- the line surges to the care team -->
+      <audio data-hf-id="hf-t5gi" id="sfx-49-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="16.110" data-duration="0.575" data-track-index="17" data-volume="0.22"></audio><!-- "early." streaks in -->
+      <audio data-hf-id="hf-lwro" id="sfx-50-whip" src="assets/audio/mix/sfx-whip.wav" data-audio-group="sfx" data-start="16.450" data-duration="0.680" data-track-index="13" data-volume="0.62"></audio><!-- whip to the console -->
+      <audio data-hf-id="hf-84wg" id="sfx-51-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="16.500" data-duration="0.575" data-track-index="18" data-volume="0.3"></audio><!-- the line draws the console -->
+      <audio data-hf-id="hf-87wc" id="sfx-52-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="16.940" data-duration="0.366" data-track-index="17" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-w494" id="sfx-53-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="16.950" data-duration="1.200" data-track-index="19" data-volume="0.3"></audio><!-- the console wipes in -->
+      <audio data-hf-id="hf-qe76" id="sfx-54-nodes" src="assets/audio/mix/sfx-nodes.wav" data-audio-group="sfx" data-start="17.100" data-duration="1.280" data-track-index="18" data-volume="0.38"></audio><!-- dashboard assembles -->
+      <audio data-hf-id="hf-3qk3" id="sfx-55-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="17.260" data-duration="0.720" data-track-index="13" data-volume="0.18"></audio><!-- tile -->
+      <audio data-hf-id="hf-vzm7" id="sfx-56-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="17.330" data-duration="0.720" data-track-index="14" data-volume="0.18"></audio><!-- tile -->
+      <audio data-hf-id="hf-nqr1" id="sfx-57-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="17.400" data-duration="0.720" data-track-index="17" data-volume="0.18"></audio><!-- tile -->
+      <audio data-hf-id="hf-ir7a" id="sfx-58-notify" src="assets/audio/mix/sfx-notify.wav" data-audio-group="sfx" data-start="17.516" data-duration="2.456" data-track-index="20" data-volume="0.5"></audio><!-- red flag lands -->
+      <audio data-hf-id="hf-yt5g" id="sfx-59-typehit" src="assets/audio/mix/sfx-typehit.wav" data-audio-group="sfx" data-start="17.536" data-duration="1.600" data-track-index="21" data-volume="0.25"></audio><!-- danger punch-in -->
+      <audio data-hf-id="hf-dr6m" id="sfx-60-swell" src="assets/audio/mix/sfx-swell.wav" data-audio-group="sfx" data-start="19.560" data-duration="3.200" data-track-index="13" data-volume="0.32"></audio><!-- riser into her moment -->
+      <audio data-hf-id="hf-cxn4" id="sfx-61-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="19.750" data-duration="0.366" data-track-index="14" data-volume="0.2"></audio><!-- hover -->
+      <audio data-hf-id="hf-er4g" id="sfx-62-click" src="assets/audio/mix/sfx-click.wav" data-audio-group="sfx" data-start="20.030" data-duration="0.480" data-track-index="15" data-volume="0.6"></audio><!-- Claim -->
+      <audio data-hf-id="hf-vcsl" id="sfx-63-alert" src="assets/audio/mix/sfx-alert.wav" data-audio-group="sfx" data-start="20.090" data-duration="2.200" data-track-index="16" data-volume="0.5"></audio><!-- her care team is alerted -->
+      <audio data-hf-id="hf-h53u" id="sfx-64-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="20.100" data-duration="1.200" data-track-index="17" data-volume="0.18"></audio><!-- the camera makes room -->
+      <audio data-hf-id="hf-f0db" id="sfx-65-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="20.150" data-duration="0.575" data-track-index="14" data-volume="0.3"></audio><!-- her profile slides in -->
+      <audio data-hf-id="hf-s9yj" id="sfx-66-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="20.530" data-duration="0.366" data-track-index="15" data-volume="0.09"></audio><!-- care timeline item -->
+      <audio data-hf-id="hf-elmh" id="sfx-67-uipop" src="assets/audio/mix/sfx-uipop.wav" data-audio-group="sfx" data-start="20.550" data-duration="0.720" data-track-index="18" data-volume="0.32"></audio><!-- referred to care -->
+      <audio data-hf-id="hf-c70z" id="sfx-68-sparkle" src="assets/audio/mix/sfx-sparkle.wav" data-audio-group="sfx" data-start="20.570" data-duration="2.000" data-track-index="19" data-volume="0.22"></audio><!-- referral sparkle -->
+      <audio data-hf-id="hf-ymxg" id="sfx-69-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="20.590" data-duration="0.366" data-track-index="20" data-volume="0.09"></audio><!-- care timeline item -->
+      <audio data-hf-id="hf-uqzk" id="sfx-70-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="20.650" data-duration="0.366" data-track-index="21" data-volume="0.09"></audio><!-- care timeline item -->
+      <audio data-hf-id="hf-pmp2" id="sfx-71-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="20.710" data-duration="0.366" data-track-index="14" data-volume="0.09"></audio><!-- care timeline item -->
+      <audio data-hf-id="hf-j017" id="sfx-72-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="21.150" data-duration="1.200" data-track-index="14" data-volume="0.42"></audio><!-- pull back to the whole route -->
+      <audio data-hf-id="hf-6w7i" id="sfx-73-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="21.170" data-duration="0.366" data-track-index="15" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-64y4" id="sfx-74-zip" src="assets/audio/mix/sfx-zip.wav" data-audio-group="sfx" data-start="21.350" data-duration="1.600" data-track-index="17" data-volume="0.4"></audio><!-- help runs home -->
+      <audio data-hf-id="hf-nb4i" id="sfx-75-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="21.450" data-duration="0.366" data-track-index="18" data-volume="0.14"></audio><!-- route labels -->
+      <audio data-hf-id="hf-oosq" id="sfx-76-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="22.080" data-duration="0.575" data-track-index="15" data-volume="0.16"></audio><!-- "And she reaches care," slides in -->
+      <audio data-hf-id="hf-qeq2" id="sfx-77-bloom" src="assets/audio/mix/sfx-bloom.wav" data-audio-group="sfx" data-start="22.440" data-duration="2.560" data-track-index="14" data-volume="0.7"></audio><!-- she reaches care -->
+      <audio data-hf-id="hf-4qve" id="sfx-78-dissolve" src="assets/audio/mix/sfx-dissolve.wav" data-audio-group="sfx" data-start="22.540" data-duration="2.760" data-track-index="16" data-volume="0.5"></audio><!-- dots stream out of her dot -->
+      <audio data-hf-id="hf-wo7e" id="sfx-79-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="23.240" data-duration="1.280" data-track-index="13" data-volume="0.3"></audio><!-- halftone resolves into mother and baby -->
+      <audio data-hf-id="hf-50ge" id="sfx-80-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="23.960" data-duration="0.575" data-track-index="15" data-volume="0.26"></audio><!-- "in time." streaks in -->
+      <audio data-hf-id="hf-93mt" id="sfx-81-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="24.326" data-duration="1.280" data-track-index="17" data-volume="0.32"></audio><!-- "in time." -->
+      <audio data-hf-id="hf-nc03" id="sfx-82-whoosh" src="assets/audio/mix/sfx-whoosh.wav" data-audio-group="sfx" data-start="24.980" data-duration="1.200" data-track-index="13" data-volume="0.35"></audio><!-- the photograph closes into her dot -->
+      <audio data-hf-id="hf-lnkx" id="sfx-83-dissolve" src="assets/audio/mix/sfx-dissolve.wav" data-audio-group="sfx" data-start="24.980" data-duration="2.760" data-track-index="15" data-volume="0.34"></audio><!-- the artwork collapses into her dot -->
+      <audio data-hf-id="hf-38ms" id="sfx-84-logo" src="assets/audio/mix/sfx-logo.wav" data-audio-group="sfx" data-start="25.500" data-duration="2.560" data-track-index="14" data-volume="0.72"></audio><!-- the line becomes the logo -->
+      <audio data-hf-id="hf-5zjd" id="sfx-85-sparkle" src="assets/audio/mix/sfx-sparkle.wav" data-audio-group="sfx" data-start="25.560" data-duration="2.000" data-track-index="16" data-volume="0.42"></audio><!-- logo burst -->
+      <audio data-hf-id="hf-ajem" id="sfx-86-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="25.580" data-duration="0.366" data-track-index="18" data-volume="0.1"></audio><!-- chapter label decodes -->
+      <audio data-hf-id="hf-x54h" id="sfx-87-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="26.100" data-duration="0.575" data-track-index="17" data-volume="0.3"></audio><!-- mark glides into the lockup -->
+      <audio data-hf-id="hf-84d2" id="sfx-88-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="26.360" data-duration="1.280" data-track-index="13" data-volume="0.14"></audio><!-- Nigeria returns, faintly -->
+      <audio data-hf-id="hf-g5r6" id="sfx-89-swish" src="assets/audio/mix/sfx-swish.wav" data-audio-group="sfx" data-start="28.100" data-duration="0.575" data-track-index="13" data-volume="0.2"></audio><!-- the line signs off -->
+      <audio data-hf-id="hf-2d65" id="sfx-90-softclick" src="assets/audio/mix/sfx-softclick.wav" data-audio-group="sfx" data-start="28.450" data-duration="0.366" data-track-index="14" data-volume="0.2"></audio><!-- domain -->
+      <audio data-hf-id="hf-z2w6" id="sfx-91-shimmer" src="assets/audio/mix/sfx-shimmer.wav" data-audio-group="sfx" data-start="29.550" data-duration="1.280" data-track-index="13" data-volume="0.3"></audio><!-- sheen -->
+      <!-- AUDIO:END -->
+    </div>
+    <script src="film.js"></script>
+    <script>
+      // film.js defines the build; run it once the DOM exists and register the one paused timeline.
+      window.__timelines["main"] = window.__buildHercova();
+    </script>
+  </body>
+</html>
