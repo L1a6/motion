@@ -1,0 +1,24 @@
+# third-party reference media: studied for the film, not needed to render it, and not ours to publish
+/Starboy - The Weeknd_mp3.mp4
+/eb9c9f95517ae797a3bb91c430ad5e08.mp4
+/animation.mp4
+/16-9.mp4
+/16-10.json
+/16-9.json
+/List-16-9.json
+/Scene.json
+/testimonials.jpg
+/voice samples/
+video/assets/lottie/
+
+# raw song sources (the film uses the mastered mix in video/assets/audio/master.wav)
+video/assets/audio/starboy*.wav
+# mix intermediates, superseded voice takes, downloaded models
+video/assets/audio/_*.wav
+video/assets/audio/vo/old/
+video/assets/audio/vo/take1/
+video/assets/audio/kokoro/
+
+# Studio caches
+video/.thumbnails/
+video/.waveform-cache/
