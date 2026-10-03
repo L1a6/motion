@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>HerCova — Care that reaches her</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="film/t.js"></script>
+    <script src="film/logo.js"></script>
+    <script src="assets/data/nigeria.js"></script>
+    <script type="importmap">{ "imports": { "three": "./assets/vendor/three/three.module.js", "three/addons/": "./assets/vendor/three/addons/" } }</script>
+    <script>
+      // film/gl.js (a module) loads its HDRI and the fonts the phone's screen draws with; hold the render until it has
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady.hcgl = new Promise((resolve) => { window.__hcGlReady = resolve; });
+    </script>
+    <style>
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-400.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-500.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-600.woff2") format("woff2"); font-weight: 600; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-700.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-800.woff2") format("woff2"); font-weight: 800; }
+      :root {
+        --void: #050506; --paper: #f4f3f7; --ink: #1d1d1f; --grey: #6e6e73; --mute: rgba(255, 255, 255, 0.62);
+        --lilac-50: #f4edf9; --lilac-100: #efe6fa; --lilac-200: #e4d4f0; --lilac: #c9a6f0; --deep: #7f5ac4; --deep-2: #8f6bcf; --deep-ink: #6a47ad;
+        --orange: #ee7b1e; --danger: #e5484d; --ok: #2fb67a;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; overflow: hidden; background: var(--void); }
+      body { font-family: "Open Sauce One", sans-serif; -webkit-font-smoothing: antialiased; color: #fff; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--void); }
+      .clip { position: absolute; inset: 0; overflow: hidden; }
+      .w { display: inline-block; white-space: pre; }
+      .ch { display: inline-block; white-space: pre; }
+      .ln { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+      .full { position: absolute; inset: 0; }
+
+      /* the world: near-black, lit by big soft lilac lights that never stop travelling */
+      #field { background: var(--void); }
+      .bw { position: absolute; inset: 0; mix-blend-mode: screen; }
+      .blob { position: absolute; left: 0; top: 0; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%; opacity: 0; }
+      #bl1 { background: radial-gradient(closest-side, rgba(176, 128, 236, 0.62), rgba(150, 100, 220, 0.24) 46%, rgba(120, 70, 200, 0) 100%); }
+      #bl2 { background: radial-gradient(closest-side, rgba(143, 107, 207, 0.62), rgba(143, 107, 207, 0.22) 50%, rgba(143, 107, 207, 0) 100%); }
+      #bl3 { background: radial-gradient(closest-side, rgba(52, 58, 130, 0.62), rgba(40, 44, 110, 0.22) 50%, rgba(30, 30, 90, 0) 100%); }
+      #glw { pointer-events: none; }
+      #gl { display: block; width: 1920px; height: 1080px; }
+
+      /* 0 · the hook (animation.mp4's first ten seconds, in lilac) */
+      #oPaper { background: #fbfafc; }
+      #oFlash { opacity: 0; }
+      #oFlash svg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+      #oDark { background: var(--void); opacity: 0; }
+      #oRib, #oSoftRib { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: visible; }
+      #oRib { opacity: 0; }
+      .ow { position: absolute; top: 508px; height: 64px; line-height: 64px; font-size: 48px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; opacity: 0; }
+      #ow3 { color: var(--deep-2); }
+      #oLens { position: absolute; inset: 0; transform-origin: 960px 540px; }
+      #oGuides { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: visible; opacity: 0; }
+      #oGuides line { stroke: rgba(255, 255, 255, 0.72); stroke-width: 1.6; stroke-dasharray: 7 7; }
+      #oCard { position: absolute; left: 740px; top: 410px; width: 440px; height: 260px; border-radius: 22px; background: #ffffff; display: flex; align-items: center; justify-content: center; opacity: 0; }
+      #oCardTint { position: absolute; inset: 0; border-radius: 22px; background: #e8dcf8; }
+      #oCardTxt { position: relative; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+      #oScreen { position: absolute; left: 210px; top: 150px; width: 1500px; height: 780px; overflow: hidden; background: #0d0c10; clip-path: inset(260px 530px 260px 530px round 22px); opacity: 0; }
+      #oCollage { position: absolute; inset: 0; background: var(--deep-2); }
+      .oc { position: absolute; width: 180px; height: 230px; border-radius: 14px; overflow: hidden; box-shadow: 0 18px 40px -12px rgba(40, 20, 80, 0.45); }
+      .oc img { width: 100%; height: 100%; object-fit: cover; }
+      #oQ { position: absolute; left: 0; right: 0; top: 330px; text-align: center; }
+      #oQ span { display: inline-block; padding: 18px 34px; border-radius: 99px; background: rgba(23, 21, 28, 0.78); font-size: 40px; font-weight: 700; letter-spacing: -0.03em; color: #fff; }
+      #oWhite { position: absolute; inset: 0; background: #ffffff; }
+      #oMark { position: absolute; left: 50%; top: 50%; width: 110px; height: 230px; margin: -115px 0 0 -55px; overflow: visible; }
+      .tl { position: absolute; border-radius: 18px; overflow: hidden; box-shadow: 0 18px 40px -12px rgba(30, 15, 70, 0.45); }
+      .tl img { width: 100%; height: 100%; object-fit: cover; }
+      .tlc { position: absolute; inset: 0; padding: 20px 22px; display: flex; flex-direction: column; }
+      .k1 { font-size: 14px; font-weight: 800; letter-spacing: 0.12em; color: #7f5ac4; }
+      .k2 { font-size: 96px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; color: #1d1d1f; }
+      .k3 { font-size: 16px; font-weight: 700; color: #ffffff; }
+      .k4 { margin-top: 6px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: #1d1d1f; }
+      #tl1 .ring { position: absolute; right: 16px; bottom: 16px; width: 60px; height: 60px; }
+      .ecg { margin-top: auto; width: 100%; height: 80px; }
+      .map { width: 100%; height: 100%; }
+      .cb { padding: 10px 14px; border-radius: 16px; font-size: 15px; font-weight: 600; max-width: 190px; }
+      .cb1 { background: #f1f0f4; color: #1d1d1f; }
+      .cb2 { margin-top: 10px; align-self: flex-end; background: #8f6bcf; color: #fff; }
+      .dots5 { display: flex; gap: 8px; margin-top: 12px; }
+      .dots5 b { width: 12px; height: 12px; border-radius: 50%; background: #c9a6f0; display: block; }
+      .rd { width: 10px; height: 10px; border-radius: 50%; background: #e5484d; display: inline-block; }
+      .bars { margin-top: auto; height: 150px; display: flex; align-items: flex-end; gap: 10px; }
+      .bars b { flex: 1; border-radius: 8px 8px 4px 4px; background: #c9a6f0; display: block; transform-origin: 50% 100%; }
+      .bars b:nth-child(6) { background: #7f5ac4; }
+      .cover { position: absolute; inset: 0; background: #ffffff; display: block; }
+      #oQuadIn { position: absolute; inset: 0; }
+      #qSweep { position: absolute; left: 40px; top: 84px; width: 665px; height: 64px; border-radius: 32px; background: #c9a6f0; transform-origin: 0 50%; }
+      #qBars { position: absolute; left: 40px; right: 40px; top: 240px; height: 120px; display: flex; align-items: flex-end; gap: 12px; }
+      #qBars b { flex: 1; border-radius: 10px 10px 4px 4px; display: block; transform-origin: 50% 100%; background: #e4d4f0; }
+      #qBars b:nth-child(3n+2) { background: #c9a6f0; }
+      #qBars b:nth-child(3n) { background: #8f6bcf; }
+      #qBars b:nth-child(7) { background: #2fb67a; }
+      #qChatWin { position: absolute; left: 0; right: 0; top: 84px; bottom: 0; overflow: hidden; }
+      #qChat { position: absolute; left: 0; right: 0; top: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 0 40px; }
+      #qChat .bub { position: relative; left: auto; right: auto; top: auto; }
+      #qChat .bub.me { align-self: flex-end; }
+      #qChat .qdots { position: relative; left: auto; top: auto; }
+      #qOrb { position: absolute; left: 50%; top: 44%; width: 0; height: 0; }
+      #qApp { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; border-radius: 30px; background: #fff; padding: 14px 32px; box-shadow: 0 20px 40px -14px rgba(60, 30, 110, 0.45); }
+      .oi { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; background: #fff; padding: 13px; box-shadow: 0 10px 24px -8px rgba(60, 30, 110, 0.4); }
+      .oi svg { width: 100%; height: 100%; display: block; }
+      #qOrbT { position: absolute; left: 0; right: 0; bottom: 34px; text-align: center; font-size: 18px; font-weight: 700; color: #6a47ad; }
+      #qMap { position: absolute; left: 190px; top: 60px; width: 380px; height: 310px; }
+      #oIris { position: absolute; inset: 0; background: #141217; clip-path: circle(0% at 50% 50%); }
+      #oPlus { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+      #oQuad { position: absolute; inset: 0; }
+      .qp { position: absolute; width: 745px; height: 385px; overflow: hidden; border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+      #oWall { position: absolute; left: 210px; top: 150px; width: 1500px; height: 780px; transform-origin: 0 0; }
+      #oCollageWin { position: absolute; inset: 0; background: #7f5ac4; overflow: hidden; }
+      /* screen A: one calm, cinematic frame — her, on the phone, and the question */
+      #oCollage { display: none; }
+      #oHero { position: absolute; inset: 0; overflow: hidden; }
+      #oHeroImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 30%; transform-origin: 62% 40%; }
+      #oHeroShade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(52, 30, 96, 0.9) 0%, rgba(62, 36, 112, 0.62) 34%, rgba(62, 36, 112, 0) 62%); }
+      #oHeroQ { position: absolute; left: 44px; bottom: 46px; font-size: 38px; font-weight: 700; line-height: 1.08; letter-spacing: -0.035em; color: #ffffff; }
+      #oHeroQ .ln { display: block; overflow: hidden; padding-bottom: 4px; }
+      #oHeroQ .w { display: inline-block; }
+      #oCollage { position: absolute; left: 0; top: 0; width: 1500px; height: 780px; transform-origin: 0 0; }
+      .chk { display: flex; gap: 10px; align-items: center; margin-top: 12px; font-size: 16px; font-weight: 600; color: #1d1d1f; }
+      .chk i { width: 20px; height: 20px; border-radius: 6px; background: #7f5ac4; display: block; }
+      #oWhiteIn { position: absolute; inset: 0; }
+      #qp1 { left: 0; top: 0; background: #ffffff; }
+      #qp2 { left: 755px; top: 0; background: #17151c; }
+      #qp3 { left: 0; top: 395px; background: var(--lilac-100); }
+      #qp4 { left: 755px; top: 395px; background: #ffffff; }
+      .qh { position: absolute; left: 40px; top: 34px; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+      #qSearch { position: absolute; left: 40px; top: 84px; width: 665px; height: 64px; border-radius: 32px; background: #f4f2f7; display: flex; align-items: center; padding: 0 26px; gap: 14px; font-size: 20px; font-weight: 500; color: var(--grey); }
+      #qCaret { width: 2px; height: 26px; background: var(--deep); }
+      .qchip { position: absolute; top: 176px; height: 50px; line-height: 50px; padding: 0 20px; border-radius: 25px; background: var(--lilac-50); color: var(--deep-ink); font-size: 18px; font-weight: 600; white-space: nowrap; }
+      #qBarT { position: absolute; left: 40px; top: 268px; font-size: 16px; font-weight: 600; color: var(--grey); }
+      #qBar { position: absolute; left: 40px; top: 300px; width: 665px; height: 12px; border-radius: 6px; background: #efebf4; overflow: hidden; }
+      #qBarFill { position: absolute; inset: 0; background: var(--deep-2); transform-origin: 0 50%; border-radius: 6px; }
+      .bub { position: absolute; max-width: 420px; padding: 16px 22px; border-radius: 24px; font-size: 18px; font-weight: 500; line-height: 1.3; }
+      .bub.me { right: 40px; background: var(--deep); color: #fff; border-bottom-right-radius: 8px; }
+      .bub.hc { left: 40px; background: #2a2731; color: #f0edf5; border-bottom-left-radius: 8px; }
+      #qTile { position: absolute; left: 40px; top: 26px; width: 44px; height: 44px; border-radius: 12px; background: #fff; padding: 5px 13px; }
+      #qTileN { position: absolute; left: 98px; top: 36px; font-size: 18px; font-weight: 700; color: #fff; }
+      .qdots { position: absolute; left: 40px; top: 300px; display: flex; gap: 6px; padding: 16px 20px; border-radius: 22px; background: #2a2731; }
+      .qdots i { width: 9px; height: 9px; border-radius: 50%; background: #b9b3c4; display: block; }
+      .ql { position: absolute; top: 96px; width: 150px; height: 200px; border-radius: 18px; overflow: hidden; box-shadow: 0 18px 36px -14px rgba(60, 30, 110, 0.4); transform-origin: 50% 100%; }
+      .ql img { width: 100%; height: 100%; object-fit: cover; }
+      #qLearnT { position: absolute; left: 40px; top: 322px; font-size: 18px; font-weight: 700; color: var(--deep-ink); }
+      .qav { position: absolute; top: 96px; width: 64px; height: 64px; border-radius: 50%; background: var(--lilac-50); color: var(--deep-ink); font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 5px #fff; }
+      #qBadge { position: absolute; left: 40px; top: 196px; height: 56px; padding: 0 22px 0 14px; border-radius: 28px; background: rgba(47, 182, 122, 0.12); display: flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 700; color: #1f8f5c; }
+      #qCallRow { position: absolute; left: 40px; top: 286px; display: flex; align-items: center; gap: 16px; font-size: 18px; font-weight: 600; color: var(--ink); }
+      #qPhoneI { position: relative; width: 50px; height: 50px; border-radius: 50%; background: var(--deep-2); display: flex; align-items: center; justify-content: center; }
+      .qring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--deep-2); opacity: 0; }
+      #oSoftBg { background: #ffffff; opacity: 0; }
+      #oSoft { opacity: 0; }
+      #oLine2 { position: absolute; left: 0; right: 0; top: 512px; text-align: center; font-size: 44px; font-weight: 600; letter-spacing: -0.03em; color: #fff; white-space: nowrap; }
+      #oLine2 .w { opacity: 0; }
+      .gc { position: absolute; border-radius: 22px; background: #ffffff; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 0 40px 8px rgba(201, 166, 240, 0.85), 0 0 120px 30px rgba(143, 107, 207, 0.55); opacity: 0; }
+      #gc1 { left: 600px; top: 300px; width: 420px; height: 240px; }
+      #gc2 { left: 900px; top: 600px; width: 420px; height: 240px; }
+      .gcT { position: absolute; left: 34px; top: 34px; font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+      .gcS { position: absolute; left: 34px; top: 70px; font-size: 16px; font-weight: 500; color: var(--grey); }
+      .gcB { position: absolute; left: 34px; bottom: 30px; width: 14px; height: 22px; background: var(--deep); }
+
+      /* 3 · her app, floating in the light */
+      #uCam { position: absolute; inset: 0; transform-origin: 960px 540px; }
+      #uMorph { position: absolute; inset: 0; z-index: 5; background: #9b7fd6; opacity: 0; clip-path: inset(477px 850px 303px 834px round 24px); }
+      #uRig { position: absolute; inset: 0; transform-origin: 50% 45%; }
+      .tabs { position: absolute; left: 330px; top: 250px; height: 52px; }
+      #uSel { position: absolute; left: 0; top: 0; width: 900px; height: 52px; overflow: visible; }
+      .tab { position: absolute; top: 0; height: 52px; line-height: 52px; font-size: 21px; font-weight: 600; color: rgba(255, 255, 255, 0.78); text-align: center; }
+      .lt { position: absolute; border-radius: 30px; background: #ffffff; color: var(--ink);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(20, 10, 40, 0.18), 0 30px 70px -18px rgba(10, 4, 24, 0.7), 0 80px 120px -50px rgba(60, 30, 120, 0.6); }
+      #uCard { left: 330px; top: 336px; width: 600px; height: 360px; padding: 32px 34px; }
+      .t-s { font-size: 18px; font-weight: 600; color: var(--grey); }
+      .t-h { margin-top: 8px; font-size: 32px; font-weight: 700; letter-spacing: -0.025em; color: var(--ink); }
+      .uchips { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .uchip { position: relative; height: 70px; border-radius: 20px; background: var(--lilac-50); padding: 0 18px; font-size: 19px; font-weight: 600; line-height: 70px; color: var(--deep-ink); overflow: hidden; }
+      .uchip .on { position: absolute; inset: 0; border-radius: 20px; background: var(--deep); color: #ffffff; padding: 0 18px; opacity: 0; }
+      #uTap { position: absolute; left: 0; top: 0; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(127, 90, 196, 0.22); border: 2px solid rgba(127, 90, 196, 0.6); opacity: 0; }
+      #uSent { left: 970px; top: 336px; width: 620px; height: 166px; padding: 0 34px; display: flex; align-items: center; gap: 22px; }
+      .okc { flex: none; width: 64px; height: 64px; border-radius: 50%; background: rgba(47, 182, 122, 0.12); display: flex; align-items: center; justify-content: center; }
+      .s1 { font-size: 28px; font-weight: 700; letter-spacing: -0.025em; }
+      .s2 { margin-top: 4px; font-size: 18px; font-weight: 500; color: var(--grey); }
+      #uNext { left: 970px; top: 524px; width: 620px; height: 120px; padding: 0 34px; display: flex; align-items: center; gap: 20px; }
+      .cal { flex: none; width: 64px; height: 64px; border-radius: 16px; background: var(--lilac-50); color: var(--deep-ink); text-align: center; font-weight: 800; }
+      .cal small { display: block; margin-top: 9px; font-size: 12px; letter-spacing: 0.08em; }
+      .cal b { display: block; font-size: 24px; line-height: 1.1; }
+      #uGridHead { position: absolute; left: 330px; top: 760px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+      .lc { position: absolute; top: 812px; width: 236px; height: 300px; border-radius: 24px; overflow: hidden; background: #222; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6); }
+      .lc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .lc .lt2 { position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 18px 16px; background: linear-gradient(180deg, rgba(5, 5, 7, 0) 0%, rgba(5, 5, 7, 0.82) 100%); font-size: 18px; font-weight: 700; line-height: 1.2; }
+      .lc .lt2 small { display: block; font-size: 14px; font-weight: 500; color: var(--mute); margin-top: 4px; }
+
+      /* 4 · kinetic type */
+      .kl { position: absolute; left: 0; right: 0; top: 500px; height: 90px; text-align: center; font-size: 66px; font-weight: 600; letter-spacing: -0.035em; line-height: 90px; white-space: nowrap; }
+      .ac { color: var(--lilac); }
+      /* the two bright worlds (the promise, the close): white paper lit by soft lilac glows that keep drifting */
+      .whiteW { background: #fbfafc; overflow: hidden; }
+      .wg { position: absolute; left: 0; top: 0; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%; }
+      .wg.a { background: radial-gradient(closest-side, rgba(201, 166, 240, 0.62), rgba(201, 166, 240, 0.22) 50%, rgba(201, 166, 240, 0) 100%); }
+      .wg.b { background: radial-gradient(closest-side, rgba(143, 107, 207, 0.36), rgba(143, 107, 207, 0.12) 50%, rgba(143, 107, 207, 0) 100%); }
+      .wg.c { background: radial-gradient(closest-side, rgba(127, 90, 196, 0.42), rgba(127, 90, 196, 0.14) 48%, rgba(127, 90, 196, 0) 100%); }
+      .wg.d { background: radial-gradient(closest-side, rgba(228, 212, 240, 0.9), rgba(228, 212, 240, 0.35) 55%, rgba(228, 212, 240, 0) 100%); }
+      #s4 .kl { color: var(--ink); }
+      #s4 .ac { color: var(--deep); }
+
+      /* 5 · the fluted glass */
+      #cCam { position: absolute; inset: 0; overflow: hidden; }
+      #cLens { position: absolute; inset: 0; transform-origin: 60% 50%; }
+      #flute { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #cMorph { position: absolute; inset: 0; }
+      .mw { position: absolute; left: 0; right: 0; top: 452px; text-align: center; font-size: 140px; font-weight: 700; letter-spacing: -0.045em; line-height: 1.1; color: var(--ink); opacity: 0; white-space: nowrap; }
+      #cSrc { position: absolute; left: 0; right: 0; top: 950px; text-align: center; opacity: 0; }
+      #cSrc span { display: inline-block; padding: 9px 18px; border-radius: 99px; background: rgba(255, 255, 255, 0.55); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: 19px; font-weight: 600; letter-spacing: 0.01em; color: var(--ink); }
+
+      /* 5b · her care team: the dashboard on deep lilac */
+      #qBg { background: var(--deep); opacity: 0; }
+      #kM { position: absolute; left: 1500.6px; top: 564px; width: 0; height: 0; opacity: 0; }
+      #kM i { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: #7f5ac4; display: block; }
+      #qSheen { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: linear-gradient(105deg, rgba(255, 255, 255, 0) 38%, rgba(228, 212, 240, 0.55) 50%, rgba(255, 255, 255, 0) 62%); }
+      .ql2 { position: absolute; left: 0; top: 0; width: 1300px; height: 1300px; margin: -650px 0 0 -650px; border-radius: 50%; mix-blend-mode: screen; }
+      #qL1 { background: radial-gradient(closest-side, rgba(228, 212, 240, 0.55), rgba(228, 212, 240, 0) 100%); }
+      #qL2 { background: radial-gradient(closest-side, rgba(201, 166, 240, 0.5), rgba(201, 166, 240, 0) 100%); }
+      #qStage { position: absolute; inset: 0; perspective: 2200px; }
+      #qWin { position: absolute; left: 240px; top: 140px; width: 1440px; height: 800px; color: var(--ink); transform-origin: 50% 50%; }
+      #qPanel { position: absolute; inset: 0; border-radius: 28px; background: #ffffff; box-shadow: 0 2px 6px rgba(40, 20, 80, 0.2), 0 50px 110px -20px rgba(30, 12, 70, 0.6), 0 120px 180px -60px rgba(30, 12, 70, 0.55); }
+      .qside { position: absolute; left: 0; top: 0; bottom: 0; width: 240px; background: #faf9fc; border-right: 1px solid #eeecf2; padding: 40px 28px; }
+      .qside h4 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+      .qnav { margin-top: 34px; display: grid; gap: 8px; font-size: 17px; font-weight: 600; color: var(--grey); }
+      .qnav div { padding: 11px 14px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
+      .qnav div i { width: 10px; height: 10px; border-radius: 3px; background: #d6d1de; display: block; }
+      .qnav .act { background: var(--lilac-50); color: var(--deep-ink); }
+      .qnav .act i { background: var(--deep); }
+      #qHead { position: absolute; left: 288px; top: 40px; }
+      #qHead h3 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; }
+      #qHead p { margin-top: 2px; font-size: 17px; font-weight: 500; color: var(--grey); }
+      #qFind { position: absolute; right: 48px; top: 46px; width: 280px; height: 46px; border-radius: 23px; background: #f4f2f7; font-size: 16px; font-weight: 500; color: #6b6772; line-height: 46px; padding-left: 22px; }
+      #qRows { position: absolute; left: 288px; top: 136px; width: 1104px; height: 640px; }
+      .qr { position: absolute; left: 0; right: 0; height: 84px; border-radius: 18px; border: 1px solid #eeecf2; display: flex; align-items: center; padding: 0 24px; gap: 18px; background: #fff; }
+      .qr .ini { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--lilac-50); color: var(--deep-ink); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+      .qr .nm { font-size: 19px; font-weight: 700; }
+      .qr .mt { font-size: 15px; font-weight: 500; color: #57535e; margin-top: 2px; }
+      .qr .st { margin-left: auto; font-size: 14px; font-weight: 700; padding: 8px 16px; border-radius: 99px; color: #146b42; background: rgba(47, 182, 122, 0.12); }
+      #qAlert { top: 0; border-color: rgba(229, 72, 77, 0.35); background: #fff6f6; }
+      #qAlert .ini { background: rgba(229, 72, 77, 0.12); color: #b3262b; }
+      #qAlert .st { color: #b3262b; background: rgba(229, 72, 77, 0.12); }
+      #qAlertBar { position: absolute; left: 0; top: 14px; bottom: 14px; width: 5px; border-radius: 3px; background: var(--danger); }
+      #qDrawer { position: absolute; right: 0; top: 0; bottom: 0; width: 460px; background: #ffffff; padding: 44px 44px; border-radius: 0 28px 28px 0; box-shadow: -40px 30px 90px -20px rgba(30, 12, 70, 0.45); border-left: 1px solid #eeecf2; }
+      #qDrawer h3 { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; }
+      #qDrawer .sub { margin-top: 4px; font-size: 17px; font-weight: 500; color: var(--grey); }
+      .qsec { margin-top: 30px; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: #6b6772; }
+      .qsym { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .qsym span { padding: 10px 16px; border-radius: 14px; background: rgba(229, 72, 77, 0.09); color: #c23a3f; font-size: 16px; font-weight: 600; }
+      .qbtn { position: absolute; left: 44px; right: 44px; height: 60px; border-radius: 30px; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; overflow: hidden; }
+      #qCall { top: 300px; background: var(--deep); color: #fff; }
+      #qCallOn { position: absolute; inset: 0; background: var(--deep-2); display: flex; align-items: center; justify-content: center; gap: 12px; opacity: 0; }
+      #qRefer { top: 376px; border: 2px solid var(--lilac-200); color: var(--deep-ink); background: #fff; }
+      #qReferOn { position: absolute; inset: 0; background: #e6f6ee; color: #1f8f5c; display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0; }
+      #qTrack { position: absolute; left: 44px; right: 44px; top: 488px; height: 120px; }
+      #qTrackSvg { position: absolute; left: 0; top: 0; width: 372px; height: 40px; overflow: visible; }
+      .qtl { position: absolute; top: 46px; width: 93px; text-align: center; font-size: 14px; font-weight: 600; color: #57535e; }
+      #qFollow { position: absolute; left: 44px; right: 44px; top: 640px; padding: 18px 20px; border-radius: 18px; background: var(--lilac-50); color: var(--deep-ink); font-size: 17px; font-weight: 600; opacity: 0; }
+      #qCur { position: absolute; left: 0; top: 0; width: 34px; height: 40px; opacity: 0; }
+      .qrip { position: absolute; left: 0; top: 0; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.9); background: rgba(127, 90, 196, 0.25); opacity: 0; }
+
+      /* 6 · the word drum (the List reference) */
+      #dHyp { position: absolute; inset: 0; width: 1920px; height: 1080px; display: none; }
+      #dGlow { position: absolute; left: 1030px; top: 540px; width: 1700px; height: 520px; margin: -260px 0 0 -850px; border-radius: 50%; background: radial-gradient(closest-side, rgba(167, 126, 230, 0.42), rgba(167, 126, 230, 0) 100%); opacity: 0; }
+      /* the selection lens is a curved slice of the drum itself: strips on the same cylinder as the words */
+      #dLens { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform-origin: 470px 0; }
+      .dls { position: absolute; left: -190px; width: 1500px; transform-origin: 0 50%; backface-visibility: hidden; opacity: 0;
+        box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.16), inset -1px 0 0 rgba(255, 255, 255, 0.10); }
+      #dStage { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 40% 50%; }
+      #dDrum { position: absolute; left: 470px; top: 540px; width: 0; height: 0; transform-style: preserve-3d; }
+      .di { position: absolute; left: 0; top: -75px; height: 150px; white-space: nowrap; font-size: 124px; font-weight: 700; letter-spacing: -0.045em; line-height: 150px; color: #fff; backface-visibility: hidden; transform-origin: 0 50%; }
+      .di .ch { transform-origin: 50% 85%; }
+      #dArrow { position: absolute; left: 318px; top: 489px; width: 112px; height: 102px; }
+      .chrome { position: absolute; font-size: 19px; font-weight: 600; letter-spacing: 0.02em; color: var(--mute); }
+      #dLabel { left: 72px; bottom: 56px; }
+      #dCount { right: 72px; bottom: 56px; font-variant-numeric: tabular-nums; color: #fff; }
+
+      /* 7 · a clinician (the 16-10 reference, rebuilt to its keyframes) */
+      #tBgWrap { position: absolute; inset: 0; transform-origin: 50% 51%; }
+      #tBg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      #tGlass { position: absolute; inset: 0; transform-origin: 914px 540px;
+        --gb: 40px; -webkit-backdrop-filter: blur(var(--gb)) saturate(1.25); backdrop-filter: blur(var(--gb)) saturate(1.25);
+        background: rgba(255, 255, 255, 0.13); clip-path: inset(110px 370px 112px 365px round 104px); }
+      #tPlate { position: absolute; left: 534px; top: 315px; width: 760px; height: 450px; transform-origin: 380px 225px; }
+      #tQuoteMark { position: absolute; left: 56px; top: 70px; font-size: 31px; font-weight: 500; line-height: 40px; color: #fff; }
+      #tQuote { position: absolute; left: 72px; top: 70px; width: 640px; font-size: 31px; font-weight: 500; letter-spacing: -0.015em; line-height: 40px; color: #fff; }
+      #tQuote .ln { height: 40px; }
+      #tWho { position: absolute; left: 68px; right: 64px; top: 312px; height: 64px; display: flex; align-items: center; gap: 16px; }
+      #tAva { width: 54px; height: 54px; border-radius: 13px; overflow: hidden; flex: none; }
+      #tAva img { width: 100%; height: 100%; object-fit: cover; }
+      #tName { font-size: 20px; font-weight: 500; line-height: 25px; color: rgba(255, 255, 255, 0.66); }
+      #tHeart { position: absolute; right: 0; top: 17px; width: 32px; height: 30px; }
+      #tHeart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #tFillMask { position: absolute; inset: 0; clip-path: circle(0% at 50% 55%); }
+
+      /* 8 · close */
+      #xWho { position: absolute; left: 794.4px; top: 457.6px; height: 40px; font-size: 31px; font-weight: 500; letter-spacing: -0.015em; line-height: 40px; color: #fff; white-space: nowrap; opacity: 0; transform-origin: 127.3px 20px; }
+      #kDot { position: absolute; left: 960px; top: 540px; width: 0; height: 0; }
+      #kDot i { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; background: var(--lilac); display: block; }
+
+      /* 9 · the end sting (the Scene reference) */
+      #eWipeIn { position: absolute; inset: 0; background: var(--paper); }
+      #eSvg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+      #eUrl { position: absolute; left: 0; right: 0; top: 470px; height: 150px; font-size: 124px; font-weight: 700; letter-spacing: -0.045em; line-height: 150px; color: var(--ink); white-space: nowrap; }
+      #eName { position: absolute; left: 397px; top: 0; clip-path: inset(0 100% 0 0); color: #b9b6c0; }
+      #eCom { position: absolute; left: 1270px; top: 0; }
+      #eCom .ch { transform-origin: 50% 90%; }
+      #eMark { position: absolute; left: 50%; top: 250px; width: 96px; height: 200px; margin-left: -48px; }
+      #eTag { position: absolute; left: 0; right: 0; top: 650px; text-align: center; font-size: 30px; font-weight: 500; letter-spacing: -0.01em; color: #6e6e73; }
+      #eWipeOut { position: absolute; inset: 0; background: var(--void); }
+
+      /* the lens */
+      #post { pointer-events: none; }
+      #vig { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 70% at 50% 47%, rgba(0, 0, 0, 0) 55%, rgba(2, 2, 4, 0.8) 100%); opacity: 0; }
+      #grain { position: absolute; inset: -10px; background: url("assets/film/grain.png"); mix-blend-mode: overlay; opacity: 0.085; }
+      svg.defs { position: absolute; width: 0; height: 0; }
+    </style>
+  </head>
+  <body>
+    <svg data-hf-id="hf-pxda" class="defs" aria-hidden="true">
+      <defs data-hf-id="hf-mh0t">
+        <filter data-hf-id="hf-n4dg" id="fWhipX" x="-30%" y="0" width="160%" height="100%" color-interpolation-filters="sRGB"><fegaussianblur data-hf-id="hf-fr14" id="whipX" stdDeviation="0 0" /></filter>
+        <filter data-hf-id="hf-uioh" id="fWhipY" x="0" y="-30%" width="100%" height="160%" color-interpolation-filters="sRGB"><fegaussianblur data-hf-id="hf-ydzj" id="whipY" stdDeviation="0 0" /></filter>
+        <filter data-hf-id="hf-szy7" id="fWarpC" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feimage data-hf-id="hf-zz1u" href="assets/film/barrel.png" x="0" y="0" width="1920" height="1080" preserveAspectRatio="none" result="m" />
+          <fedisplacementmap data-hf-id="hf-whos" id="warpC" in="SourceGraphic" in2="m" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter data-hf-id="hf-3id7" id="fWarpO" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feimage data-hf-id="hf-zjzq" href="assets/film/barrel.png" x="0" y="0" width="1920" height="1080" preserveAspectRatio="none" result="m" />
+          <fedisplacementmap data-hf-id="hf-arxk" id="warpO" in="SourceGraphic" in2="m" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter data-hf-id="hf-dgi4" id="ribGlow" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2520" height="1680"><fegaussianblur data-hf-id="hf-idbn" stdDeviation="46" /></filter>
+        <filter data-hf-id="hf-c4rg" id="ribGlow2" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2520" height="1680"><fegaussianblur data-hf-id="hf-dlx7" stdDeviation="20" /></filter>
+        <filter data-hf-id="hf-tp3m" id="softGlow" x="-20%" y="-80%" width="140%" height="260%"><fegaussianblur data-hf-id="hf-e3dc" stdDeviation="46" /></filter>
+        <!-- liquid text morph: blurred words melt through an alpha threshold -->
+        <filter data-hf-id="hf-uurk" id="goo" x="-10%" y="-30%" width="120%" height="160%" color-interpolation-filters="sRGB">
+          <fecolormatrix data-hf-id="hf-wrr8" in="SourceGraphic" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -10" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div data-hf-id="hf-1csr" id="root" data-composition-id="main" data-start="0" data-duration="65.833" data-width="1920" data-height="1080">
+
+      <!-- the world -->
+      <div data-hf-id="hf-s18v" id="field" class="clip" data-start="0" data-duration="65.833" data-track-index="0">
+        <div data-hf-id="hf-gxw1" class="bw" id="bw3"><div data-hf-id="hf-kvzg" class="blob" id="bl3"></div></div>
+        <div data-hf-id="hf-g688" class="bw" id="bw2"><div data-hf-id="hf-lnn9" class="blob" id="bl2"></div></div>
+        <div data-hf-id="hf-ou43" class="bw" id="bw1"><div data-hf-id="hf-plra" class="blob" id="bl1"></div></div>
+      </div>
+
+      <!-- 0 · the hook -->
+      <div data-hf-id="hf-kqcw" id="s0" class="clip" data-start="0" data-duration="10.9" data-track-index="1">
+        <svg data-hf-id="hf-ytpq" id="oRib" viewBox="0 0 1920 1080">
+          <path data-hf-id="hf-p8c3" id="rb0" d="" fill="none" stroke="#a77ee6" stroke-width="130" stroke-linecap="round" filter="url(#ribGlow)" opacity="0.8" />
+          <path data-hf-id="hf-pi70" id="rb1" d="" fill="none" stroke="#e9dcff" stroke-width="34" opacity="0.55" stroke-linecap="round" filter="url(#ribGlow2)" />
+          <path data-hf-id="hf-hr6g" id="rb2" d="" fill="none" stroke="#f6f0ff" stroke-width="3.5" opacity="0" stroke-linecap="round" />
+        </svg>
+        <div data-hf-id="hf-u5yq" id="oPaper" class="full"></div>
+        <div data-hf-id="hf-h5ze" id="oFlash" class="full"><svg data-hf-id="hf-ff52" viewBox="0 0 1920 1080"><rect data-hf-id="hf-q45c" width="1920" height="1080" id="oFlashR" fill="#dcd6e4" /><path data-hf-id="hf-hirl" id="oFlashRib" d="" fill="none" stroke="#6b4aa8" stroke-width="70" stroke-linecap="round" opacity="0" /></svg></div>
+        <div data-hf-id="hf-nj08" id="oDark" class="full"></div>
+        <div data-hf-id="hf-ljab" id="oWords">
+          <span data-hf-id="hf-buh5" class="ow" id="ow1" style="left:895.8px">Hello,</span>
+          <span data-hf-id="hf-4wy7" class="ow" id="ow2" style="left:797.65px">meet</span>
+          <span data-hf-id="hf-6243" class="ow" id="ow3" style="left:926.45px">HerCova</span>
+        </div>
+        <div data-hf-id="hf-vxvg" id="oLens">
+          <svg data-hf-id="hf-leg8" id="oGuides" viewBox="0 0 1920 1080"><line data-hf-id="hf-5moh" id="gL" /><line data-hf-id="hf-sci7" id="gR" /><line data-hf-id="hf-x2a1" id="gT" /><line data-hf-id="hf-79pb" id="gB" /><line data-hf-id="hf-8a6n" id="gV" x1="960" x2="960" y1="-200" y2="1280" opacity="0" /><line data-hf-id="hf-6jo7" id="gH" x1="-200" x2="2120" y1="540" y2="540" opacity="0" /></svg>
+          <div data-hf-id="hf-3cmq" id="oCard"><div data-hf-id="hf-57jx" id="oCardTint"></div><div data-hf-id="hf-1j5u" id="oCardTxt">Where does safer motherhood begin?</div></div>
+          <!-- the screen wall: four dark screens on a 2×2 grid; the camera flies across it -->
+          <div data-hf-id="hf-qzr8" id="oWall">
+            <!-- screen A: the moodboard film, then her check-in -->
+            <div data-hf-id="hf-d91b" class="qp" id="qp1">
+              <div data-hf-id="hf-4ih7" class="qh" style="color:#1d1d1f">Today's check-in</div>
+              <div data-hf-id="hf-zm1m" id="qSweep"></div>
+              <div data-hf-id="hf-r0ta" id="qSearch"><span data-hf-id="hf-y9mz" id="qType"></span><div data-hf-id="hf-tbj3" id="qCaret"></div></div>
+              <div data-hf-id="hf-xmbh" class="qchip" style="left:40px">Headache</div>
+              <div data-hf-id="hf-1t28" class="qchip" style="left:186px">Swelling</div>
+              <div data-hf-id="hf-8qyf" class="qchip" style="left:322px">Blurred vision</div>
+              <div data-hf-id="hf-xf2x" class="qchip" style="left:508px">Feeling well</div>
+              <div data-hf-id="hf-g4jc" id="qBars"><b data-hf-id="hf-xujp"></b><b data-hf-id="hf-ey49"></b><b data-hf-id="hf-g51c"></b><b data-hf-id="hf-fqqb"></b><b data-hf-id="hf-dr76"></b><b data-hf-id="hf-dcw5"></b><b data-hf-id="hf-ejt8"></b><b data-hf-id="hf-e5i7"></b><b data-hf-id="hf-c5z2"></b></div>
+              <div data-hf-id="hf-9j1v" id="oCollageWin"><div data-hf-id="hf-f2k8" id="oHero"><img data-hf-id="hf-imrz" id="oHeroImg" src="assets/images/mother-answering-at-home.jpeg" alt=""><div data-hf-id="hf-h3pn" id="oHeroShade"></div><div data-hf-id="hf-6kih" id="oHeroQ"><span data-hf-id="hf-ogei" class="ln"><span data-hf-id="hf-dp9v" class="w">Where</span> <span data-hf-id="hf-syp9" class="w">does</span> <span data-hf-id="hf-daid" class="w">safer</span></span><span data-hf-id="hf-o23h" class="ln"><span data-hf-id="hf-fsll" class="w">motherhood</span> <span data-hf-id="hf-omd2" class="w">begin?</span></span></div></div><div data-hf-id="hf-p2if" id="oCollage">
+                <div data-hf-id="hf-ev7j" class="tl" id="tl1" style="left:110px;top:40px;width:280px;height:300px;background:#fff"><div data-hf-id="hf-qq1f" class="tlc"><div data-hf-id="hf-vz0s" class="k1">WEEK</div><div data-hf-id="hf-hf4p" class="k2">28</div><svg data-hf-id="hf-g1vq" class="ring" viewBox="0 0 60 60"><circle data-hf-id="hf-qy8a" cx="30" cy="30" r="24" fill="none" stroke="#efe6fa" stroke-width="7" /><circle data-hf-id="hf-iwc7" class="ringp" cx="30" cy="30" r="24" fill="none" stroke="#7f5ac4" stroke-width="7" stroke-linecap="round" transform="rotate(-90 30 30)" /></svg></div><i data-hf-id="hf-ho8l" class="cover"></i></div>
+                <div data-hf-id="hf-6fqx" class="tl" id="tl2" style="left:410px;top:40px;width:280px;height:200px;background:#17151c"><div data-hf-id="hf-jf77" class="tlc"><div data-hf-id="hf-dqwh" class="k3">Her heartbeat</div><svg data-hf-id="hf-z0te" class="ecg" viewBox="0 0 220 70"><path data-hf-id="hf-4hwv" id="ecgP" d="M0 40 H52 L62 22 L72 58 L84 6 L96 64 L106 40 H150 L158 30 L166 46 L174 40 H220" fill="none" stroke="#c9a6f0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" /></svg></div><i data-hf-id="hf-7yg9" class="cover"></i></div>
+                <div data-hf-id="hf-eh26" class="tl" id="tl3" style="left:710px;top:40px;width:280px;height:260px;background:#f4edf9"><div data-hf-id="hf-j0w6" class="tlc"><svg data-hf-id="hf-a049" class="map" viewBox="-20 -20 1040 860"><path data-hf-id="hf-pe3e" class="ngaP" d="" fill="#e4d4f0" stroke="#7f5ac4" stroke-width="10" stroke-linejoin="round" /><g data-hf-id="hf-ts3y" class="pins" /></svg></div><i data-hf-id="hf-95dc" class="cover"></i></div>
+                <div data-hf-id="hf-mq9v" class="tl" id="tl4" style="left:1010px;top:40px;width:280px;height:220px;background:#fff"><div data-hf-id="hf-iml5" class="tlc"><div data-hf-id="hf-nc73" class="cb cb1">How are you feeling?</div><div data-hf-id="hf-m5rt" class="cb cb2">A bad headache.</div></div><i data-hf-id="hf-8r2b" class="cover"></i></div>
+                <div data-hf-id="hf-fflw" class="tl" id="tl5" style="left:1310px;top:40px;width:280px;height:260px;background:#fff"><div data-hf-id="hf-i8a4" class="tlc"><div data-hf-id="hf-tht2" class="k1" style="color:#c23a3f">THURSDAY</div><div data-hf-id="hf-hz22" class="k2" style="font-size:96px">10</div><div data-hf-id="hf-3sx9" class="k3" style="color:#57535e">Antenatal visit</div></div><i data-hf-id="hf-6rj6" class="cover"></i></div>
+                <div data-hf-id="hf-r7qr" class="tl" id="tl6" style="left:110px;top:360px;width:280px;height:240px;background:#17151c"><div data-hf-id="hf-htz3" class="tlc"><div data-hf-id="hf-ct9d" class="k2" style="color:#c9a6f0;font-size:90px">Aa</div><div data-hf-id="hf-lxmt" class="k3">Five languages</div><div data-hf-id="hf-j555" class="dots5"><b data-hf-id="hf-bro1"></b><b data-hf-id="hf-yhbf"></b><b data-hf-id="hf-yvmg"></b><b data-hf-id="hf-xopd"></b><b data-hf-id="hf-y30e"></b></div></div><i data-hf-id="hf-6d85" class="cover"></i></div>
+                <div data-hf-id="hf-fu11" class="tl" id="tl7" style="left:410px;top:260px;width:280px;height:240px;background:#fff"><div data-hf-id="hf-an92" class="tlc" style="align-items:center;justify-content:center"><svg data-hf-id="hf-993v" viewBox="0 0 80 80" style="width:96px;height:96px"><circle data-hf-id="hf-dx35" cx="40" cy="40" r="36" fill="#e6f6ee" /><path data-hf-id="hf-dqs3" id="tl7Tick" d="M24 41 L35 52 L57 29" fill="none" stroke="#2fb67a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" /></svg><div data-hf-id="hf-uwj3" class="k3" style="color:#1d1d1f;margin-top:10px">Check-in sent</div></div><i data-hf-id="hf-7k58" class="cover"></i></div>
+                <div data-hf-id="hf-hy27" class="tl" id="tl8" style="left:710px;top:320px;width:280px;height:380px"><img data-hf-id="hf-0mw6" src="assets/images/hero-mother-gele-hd.jpeg" alt=""><i data-hf-id="hf-75u7" class="cover"></i></div>
+                <div data-hf-id="hf-lhqe" class="tl" id="tl9" style="left:1010px;top:280px;width:280px;height:200px;background:#fff"><div data-hf-id="hf-hfo2" class="tlc"><div data-hf-id="hf-x6e9" class="k3" style="color:#b3262b;display:flex;align-items:center;gap:10px"><span data-hf-id="hf-gigz" class="rd"></span>DANGER SIGN</div><div data-hf-id="hf-8uys" class="k4">Amina · Week 28</div><div data-hf-id="hf-d2xl" class="k3" style="color:#57535e">Care team alerted</div></div><i data-hf-id="hf-56b2" class="cover"></i></div>
+                <div data-hf-id="hf-k907" class="tl" id="tl10" style="left:1310px;top:320px;width:280px;height:260px;background:#fff"><div data-hf-id="hf-h1d1" class="tlc"><div data-hf-id="hf-9vox" class="k3" style="color:#57535e">Check-ins this week</div><div data-hf-id="hf-umx2" class="bars"><b data-hf-id="hf-q52m" style="height:44%"></b><b data-hf-id="hf-20wa" style="height:62%"></b><b data-hf-id="hf-y7pn" style="height:50%"></b><b data-hf-id="hf-lish" style="height:78%"></b><b data-hf-id="hf-6ofa" style="height:66%"></b><b data-hf-id="hf-vy3l" style="height:92%"></b><b data-hf-id="hf-ajxb" style="height:72%"></b></div></div><i data-hf-id="hf-4s01" class="cover"></i></div>
+                <div data-hf-id="hf-lie6" class="tl" id="tl11" style="left:110px;top:620px;width:280px;height:260px"><img data-hf-id="hf-lj22" src="assets/images/mother-white-suit.jpeg" alt=""><i data-hf-id="hf-lgm3" class="cover"></i></div>
+                <div data-hf-id="hf-di72" class="tl" id="tl12" style="left:1010px;top:500px;width:280px;height:300px"><img data-hf-id="hf-wvuy" src="assets/images/couple-holding-hands.jpeg" alt=""><i data-hf-id="hf-lux4" class="cover"></i></div>
+                <div data-hf-id="hf-jhli" class="tl" id="tl13" style="left:410px;top:520px;width:280px;height:200px;background:#17151c"><div data-hf-id="hf-gn20" class="tlc"><div data-hf-id="hf-7lgp" class="k3" style="color:#c9a6f0">NURSE ON DUTY</div><div data-hf-id="hf-z4bf" class="k4" style="color:#fff">Calling Amina…</div><div data-hf-id="hf-v0sd" class="dots5"><b data-hf-id="hf-ww3b"></b><b data-hf-id="hf-xaec"></b><b data-hf-id="hf-w3h9"></b></div></div><i data-hf-id="hf-ko01" class="cover"></i></div>
+                <div data-hf-id="hf-z56q" class="tl" id="tl14" style="left:1310px;top:600px;width:280px;height:240px;background:#efe6fa"><div data-hf-id="hf-g8qz" class="tlc"><div data-hf-id="hf-hmyh" class="k3" style="color:#6a47ad">Birth plan</div><div data-hf-id="hf-cxv0" class="chk"><i data-hf-id="hf-wt6k"></i>Hospital bag</div><div data-hf-id="hf-i545" class="chk"><i data-hf-id="hf-zeb8"></i>Transport</div><div data-hf-id="hf-5hl0" class="chk"><i data-hf-id="hf-y7e5"></i>Blood donor</div></div><i data-hf-id="hf-l2b2" class="cover"></i></div>
+                <div data-hf-id="hf-p9zd" id="oQ"><span data-hf-id="hf-qsid">Where does safer motherhood begin?</span></div>
+              </div></div>
+            </div>
+            <!-- screen B: the logo film (it builds itself), an iris, a crosshair — then her chat -->
+            <div data-hf-id="hf-2djo" class="qp" id="qp2">
+              <div data-hf-id="hf-x5be" id="qTile"></div><div data-hf-id="hf-nph0" id="qTileN">HerCova</div>
+              <div data-hf-id="hf-j3zi" id="qChatWin"><div data-hf-id="hf-3x3w" id="qChat">
+                <div data-hf-id="hf-g6hw" class="bub me">I have a bad headache and my eyes are blurry.</div>
+                <div data-hf-id="hf-0sbp" class="bub hc">Thank you, Amina. Your care team has been alerted.</div>
+                <div data-hf-id="hf-5hxn" class="bub hc">Nurse Bisi will call you in a moment.</div>
+                <div data-hf-id="hf-z2tu" class="bub me">Thank you 🙏</div>
+                <div data-hf-id="hf-ixaz" class="bub hc">Please rest and keep your phone close.</div>
+                <div data-hf-id="hf-ejgt" class="qdots"><i data-hf-id="hf-ylp6"></i><i data-hf-id="hf-0l8b"></i><i data-hf-id="hf-0zjc"></i></div>
+              </div></div>
+              <div data-hf-id="hf-89iv" id="oWhite"><div data-hf-id="hf-1ea2" id="oWhiteIn"><svg data-hf-id="hf-kp54" id="oMark" viewBox="0 0 251 524"><path data-hf-id="hf-ldqm" id="mkSw" d="" fill="#7B2FA8" fill-opacity="0" stroke="#7B2FA8" stroke-width="5" /><path data-hf-id="hf-7zhq" id="mkBody" d="" fill="#EE7B1E" /><path data-hf-id="hf-lc4w" id="mkHead" d="" fill="#EE7B1E" /></svg></div></div>
+              <div data-hf-id="hf-uh71" id="oIris"><svg data-hf-id="hf-3fa0" id="oPlus" viewBox="0 0 40 40"><path data-hf-id="hf-ukyr" d="M20 4 V36 M4 20 H36" stroke="#ffffff" stroke-width="3" stroke-linecap="round" /></svg></div>
+            </div>
+            <!-- screen C: always with her -->
+            <div data-hf-id="hf-357h" class="qp" id="qp3">
+              <div data-hf-id="hf-5ed1" id="qOrb">
+                <div data-hf-id="hf-99gz" id="qApp"></div>
+                <div data-hf-id="hf-hkcv" class="oi" id="oi1"><svg data-hf-id="hf-ulu9" viewBox="0 0 24 24"><path data-hf-id="hf-8w7n" d="M12 21 C5 16 2 12.5 2 8.6 C2 5.6 4.3 3.4 7.1 3.4 C9 3.4 10.8 4.5 12 6.3 C13.2 4.5 15 3.4 16.9 3.4 C19.7 3.4 22 5.6 22 8.6 C22 12.5 19 16 12 21Z" fill="#e5484d" /></svg></div>
+                <div data-hf-id="hf-6ov8" class="oi" id="oi2"><svg data-hf-id="hf-1tol" viewBox="0 0 24 24"><path data-hf-id="hf-3w88" d="M12 3 a6 6 0 0 1 6 6 v4 l2 3 H4 l2-3 V9 a6 6 0 0 1 6-6 Z M10 19 h4 a2 2 0 0 1 -4 0Z" fill="#7f5ac4" /></svg></div>
+                <div data-hf-id="hf-9o4t" class="oi" id="oi3"><svg data-hf-id="hf-30lo" viewBox="0 0 24 24"><rect data-hf-id="hf-d66m" x="3" y="5" width="18" height="16" rx="3" fill="none" stroke="#2fb67a" stroke-width="2.4" /><path data-hf-id="hf-udcn" d="M3 10 H21 M8 3 V7 M16 3 V7" stroke="#2fb67a" stroke-width="2.4" stroke-linecap="round" /></svg></div>
+                <div data-hf-id="hf-q88q" class="oi" id="oi4"><svg data-hf-id="hf-2man" viewBox="0 0 24 24"><path data-hf-id="hf-qzrn" d="M4 5 H20 V16 H11 L6 20 V16 H4 Z" fill="none" stroke="#ee7b1e" stroke-width="2.4" stroke-linejoin="round" /></svg></div>
+              </div>
+              <div data-hf-id="hf-92sd" id="qOrbT">Always with her</div>
+            </div>
+            <!-- screen D: wherever she is -->
+            <div data-hf-id="hf-lwx6" class="qp" id="qp4">
+              <div data-hf-id="hf-1h7w" class="qh" style="color:#1d1d1f">Wherever she is</div>
+              <svg data-hf-id="hf-236j" id="qMap" viewBox="-20 -20 1040 860"><path data-hf-id="hf-6a2r" class="ngaP" d="" fill="#f4edf9" stroke="#7f5ac4" stroke-width="7" stroke-linejoin="round" /><g data-hf-id="hf-2qoi" class="pins" /></svg>
+            </div>
+          </div>
+        </div>
+        <div data-hf-id="hf-gksk" id="oSoft" class="full"><div data-hf-id="hf-j0r1" id="oSoftBg" class="full"></div><svg data-hf-id="hf-f6k2" id="oSoftRib" viewBox="0 0 1920 1080"><path data-hf-id="hf-2l2i" id="rs0" d="" fill="none" stroke="#efe4ff" stroke-width="210" stroke-linecap="round" filter="url(#softGlow)" opacity="0.5" /></svg></div>
+        <div data-hf-id="hf-yt0w" id="oLine2"></div>
+        <div data-hf-id="hf-293j" class="gc" id="gc1"><div data-hf-id="hf-vwfk" class="gcT">Week 28 check-in</div><div data-hf-id="hf-qjhp" class="gcS">Two danger signs reported</div><div data-hf-id="hf-0kwj" class="gcB" id="gcB1"></div></div>
+        <div data-hf-id="hf-tl7o" class="gc" id="gc2"><div data-hf-id="hf-k5fv" class="gcT">Care team alerted</div><div data-hf-id="hf-0ajc" class="gcS">A nurse is calling her now</div><div data-hf-id="hf-rx0o" class="gcB" id="gcB2"></div></div>
+      </div>
+
+      <!-- 5 · the fluted glass plate (the 16-9 reference, graded lilac); the lens rig carries zoom + warp -->
+      <div data-hf-id="hf-w8ux" id="cCam">
+        <div data-hf-id="hf-95ds" id="cLens">
+          <video data-hf-id="hf-qp3f" id="flute" src="assets/film/flute.mp4" muted playsinline data-start="20.2" data-duration="8.283" data-playback-rate="0.9" data-track-index="2"></video>
+        </div>
+      </div>
+      <div data-hf-id="hf-02l6" id="s5" class="clip" data-start="21.2" data-duration="7.283" data-track-index="3">
+        <div data-hf-id="hf-vuqm" id="cMorph">
+          <div data-hf-id="hf-6y4x" class="mw" id="m1">Every 7 minutes,</div>
+          <div data-hf-id="hf-my1w" class="mw" id="m2">a woman in Nigeria</div>
+          <div data-hf-id="hf-p7f7" class="mw" id="m3">dies in pregnancy</div>
+          <div data-hf-id="hf-8sgv" class="mw" id="m4">or childbirth.</div>
+        </div>
+        <div data-hf-id="hf-5tda" id="cSrc"><span data-hf-id="hf-hpi1">Source: WHO and partners, 2025</span></div>
+      </div>
+
+      <!-- the 3D layer (film/gl.js): the phone -->
+      <div data-hf-id="hf-y4lr" id="glw" class="clip" data-start="10.4" data-duration="44.633" data-track-index="4">
+        <canvas data-hf-id="hf-au7v" id="gl" width="2880" height="1620"></canvas>
+      </div>
+
+      <!-- 3 · her app, floating in the light -->
+      <div data-hf-id="hf-smku" id="s3" class="clip" data-start="16.45" data-duration="5.75" data-track-index="5">
+        <div data-hf-id="hf-pt1j" id="uCam"><div data-hf-id="hf-d6mw" id="uRig">
+          <div data-hf-id="hf-5rmk" class="tabs">
+            <svg data-hf-id="hf-5366" id="uSel" viewBox="0 0 900 52"><rect data-hf-id="hf-thzg" id="uSelR" x="0" y="0" width="112" height="52" rx="26" fill="#ffffff" /></svg>
+            <div data-hf-id="hf-pf8c" class="tab" id="tb0" style="left:0;width:112px">Today</div>
+            <div data-hf-id="hf-sp2h" class="tab" id="tb1" style="left:124px;width:150px">Check-in</div>
+            <div data-hf-id="hf-o3a3" class="tab" id="tb2" style="left:286px;width:118px">Visits</div>
+            <div data-hf-id="hf-cg6v" class="tab" id="tb3" style="left:416px;width:116px">Learn</div>
+          </div>
+          <div data-hf-id="hf-oam5" id="uCard" class="lt">
+            <div data-hf-id="hf-vxph" class="t-s">Today's check-in</div>
+            <div data-hf-id="hf-c8xf" class="t-h">How are you feeling?</div>
+            <div data-hf-id="hf-4pxa" class="uchips">
+              <div data-hf-id="hf-l8hr" class="uchip" id="uc1">Severe headache<div data-hf-id="hf-t92g" class="on">Severe headache</div></div>
+              <div data-hf-id="hf-0zwl" class="uchip" id="uc2">Blurred vision<div data-hf-id="hf-558j" class="on">Blurred vision</div></div>
+              <div data-hf-id="hf-48sp" class="uchip" id="uc3">Swollen face</div>
+              <div data-hf-id="hf-d79b" class="uchip" id="uc4">Feeling well</div>
+            </div>
+            <div data-hf-id="hf-hib9" id="uTap"></div>
+          </div>
+          <div data-hf-id="hf-5ef1" id="uSent" class="lt">
+            <div data-hf-id="hf-4byh" class="okc"><svg data-hf-id="hf-zfx0" width="30" height="30" viewBox="0 0 24 24"><path data-hf-id="hf-5oj9" id="uTick" d="M5 12.5 L10 17 L19 7" fill="none" stroke="#2fb67a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
+            <div data-hf-id="hf-yeow"><div data-hf-id="hf-0j5m" class="s1">Check-in sent</div><div data-hf-id="hf-a2le" class="s2">Your care team can see it now.</div></div>
+          </div>
+          <div data-hf-id="hf-2jmo" id="uNext" class="lt">
+            <div data-hf-id="hf-0b98" class="cal"><small data-hf-id="hf-x0qv">THU</small><b data-hf-id="hf-jyhw">10</b></div>
+            <div data-hf-id="hf-y7yw"><div data-hf-id="hf-4zbm" class="s1" style="font-size:24px">Antenatal visit · 10:00</div><div data-hf-id="hf-vmgi" class="s2">Ikeja PHC</div></div>
+          </div>
+          <div data-hf-id="hf-traq" id="uGridHead">Learn this week</div>
+          <div data-hf-id="hf-zi3y" class="lc" style="left:330px"><img data-hf-id="hf-2sud" src="assets/images/hands-on-bump-cream.jpeg" alt=""><div data-hf-id="hf-wwoj" class="lt2">Your third trimester<small data-hf-id="hf-fjik">4 min</small></div></div>
+          <div data-hf-id="hf-kerr" class="lc" style="left:582px"><img data-hf-id="hf-k9tg" src="assets/images/mother-braids-white.jpeg" alt=""><div data-hf-id="hf-7abb" class="lt2">Danger signs to know<small data-hf-id="hf-a555">3 min</small></div></div>
+          <div data-hf-id="hf-sl9x" class="lc" style="left:834px"><img data-hf-id="hf-vshk" src="assets/images/vision-mother-toddler.jpeg" alt=""><div data-hf-id="hf-3888" class="lt2">Eating well<small data-hf-id="hf-9x2r">5 min</small></div></div>
+          <div data-hf-id="hf-yq25" class="lc" style="left:1086px"><img data-hf-id="hf-yw62" src="assets/images/mother-newborn-goldenlight.jpeg" alt=""><div data-hf-id="hf-m18i" class="lt2">After the birth<small data-hf-id="hf-wfc4">4 min</small></div></div>
+          <div data-hf-id="hf-esll" class="lc" style="left:1338px"><img data-hf-id="hf-8n76" src="assets/images/screening-mother-hijab.jpeg" alt=""><div data-hf-id="hf-fnh0" class="lt2">Preparing for birth<small data-hf-id="hf-mrcm">6 min</small></div></div>
+        </div></div>
+      </div>
+
+      <!-- 4 · kinetic type -->
+      <div data-hf-id="hf-6hwi" id="s4" class="clip" data-start="27.233" data-duration="6.1" data-track-index="6">
+        <div data-hf-id="hf-tb7b" id="kWhite" class="full whiteW"><div data-hf-id="hf-mlbe" class="wg d" id="kG4"></div><div data-hf-id="hf-dyhk" class="wg a" id="kG1"></div><div data-hf-id="hf-ftly" class="wg b" id="kG2"></div></div>
+        <div data-hf-id="hf-80xn" class="kl" id="k1"></div>
+        <div data-hf-id="hf-zd1s" class="kl" id="k2"></div>
+        <div data-hf-id="hf-vi21" id="kM"><i data-hf-id="hf-o6lu"></i></div>
+      </div>
+
+      <!-- 5b · her care team: a live dashboard on deep lilac -->
+      <div data-hf-id="hf-dc2j" id="sQ" class="clip" data-start="32.733" data-duration="6.55" data-track-index="7">
+        <div data-hf-id="hf-923v" id="qBg" class="full"></div>
+        <div data-hf-id="hf-zxe7" class="ql2" id="qL1"></div>
+        <div data-hf-id="hf-p1wk" class="ql2" id="qL2"></div>
+        <div data-hf-id="hf-05ac" id="qStage">
+          <div data-hf-id="hf-5xro" id="qWin">
+            <div data-hf-id="hf-qstk" id="qPanel"></div>
+            <div data-hf-id="hf-gba5" id="qSheen"></div>
+            <div data-hf-id="hf-fr1c" class="qside"><h4 data-hf-id="hf-fof5">Care team</h4>
+              <div data-hf-id="hf-vpjg" class="qnav"><div data-hf-id="hf-pxvf" class="act"><i data-hf-id="hf-zsm9"></i>Alerts</div><div data-hf-id="hf-62jy"><i data-hf-id="hf-06xa"></i>Women</div><div data-hf-id="hf-qbni"><i data-hf-id="hf-26gf"></i>Referrals</div><div data-hf-id="hf-z2iy"><i data-hf-id="hf-2krg"></i>Follow-ups</div><div data-hf-id="hf-yn8t"><i data-hf-id="hf-oz7w"></i>Schedule</div></div></div>
+            <div data-hf-id="hf-giic" id="qHead"><h3 data-hf-id="hf-h0sj">Alerts</h3><p data-hf-id="hf-d398">Ikeja PHC · on duty</p></div>
+            <div data-hf-id="hf-nov5" id="qFind">Search women</div>
+            <div data-hf-id="hf-8s95" id="qRows" data-layout-allow-overlap="">
+              <div data-hf-id="hf-k7f6" class="qr" id="qAlert"><div data-hf-id="hf-n613" id="qAlertBar"></div><div data-hf-id="hf-tznw" class="ini">AA</div><div data-hf-id="hf-x11t"><div data-hf-id="hf-t6o3" class="nm">Amina A. · Week 28</div><div data-hf-id="hf-5cq1" class="mt">Severe headache, blurred vision · just now</div></div><div data-hf-id="hf-gd13" class="st">Danger sign</div></div>
+              <div data-hf-id="hf-gg9w" class="qr qs" style="top:0"><div data-hf-id="hf-8hpi" class="ini">FB</div><div data-hf-id="hf-xfcu"><div data-hf-id="hf-ubih" class="nm">Funke B. · Week 31</div><div data-hf-id="hf-kvak" class="mt">Check-in complete · no warning signs</div></div><div data-hf-id="hf-mjpy" class="st">Stable</div></div>
+              <div data-hf-id="hf-vfi9" class="qr qs" style="top:96px"><div data-hf-id="hf-i1it" class="ini">NO</div><div data-hf-id="hf-w8fr"><div data-hf-id="hf-w5bo" class="nm">Ngozi O. · Week 22</div><div data-hf-id="hf-07i4" class="mt">Follow-up call done</div></div><div data-hf-id="hf-nl8a" class="st">Stable</div></div>
+              <div data-hf-id="hf-3qjk" class="qr qs" style="top:192px"><div data-hf-id="hf-f3b9" class="ini">HM</div><div data-hf-id="hf-wmqs"><div data-hf-id="hf-4uga" class="nm">Hauwa M. · Week 36</div><div data-hf-id="hf-cx3k" class="mt">Clinic visit booked</div></div><div data-hf-id="hf-nzjb" class="st">Stable</div></div>
+              <div data-hf-id="hf-1rpi" class="qr qs" style="top:288px"><div data-hf-id="hf-uw1z" class="ini">RA</div><div data-hf-id="hf-vftp"><div data-hf-id="hf-ahll" class="nm">Ruth A. · Week 18</div><div data-hf-id="hf-3dac" class="mt">Check-in complete · no warning signs</div></div><div data-hf-id="hf-oduc" class="st">Stable</div></div>
+              <div data-hf-id="hf-m5vf" class="qr qs" style="top:384px"><div data-hf-id="hf-lalz" class="ini">ZY</div><div data-hf-id="hf-vu4q"><div data-hf-id="hf-s5ps" class="nm">Zainab Y. · Week 26</div><div data-hf-id="hf-9jo3" class="mt">Lesson finished · danger signs</div></div><div data-hf-id="hf-os5d" class="st">Stable</div></div>
+            </div>
+            <div data-hf-id="hf-a4jh" id="qDrawer" data-layout-allow-overlap="">
+              <h3 data-hf-id="hf-f55b">Amina A.</h3><div data-hf-id="hf-eqn3" class="sub">Week 28 · third trimester</div>
+              <div data-hf-id="hf-azeu" class="qsec">REPORTED TODAY</div>
+              <div data-hf-id="hf-49zy" class="qsym"><span data-hf-id="hf-53uy">Severe headache</span><span data-hf-id="hf-dv2d">Blurred vision</span></div>
+              <div data-hf-id="hf-dpm5" class="qbtn" id="qCall">Call her now<div data-hf-id="hf-beql" id="qCallOn"><span data-hf-id="hf-gpe4" id="qCallT">Calling Amina · 0:00</span></div></div>
+              <div data-hf-id="hf-ct7n" class="qbtn" id="qRefer">Refer to hospital<div data-hf-id="hf-honv" id="qReferOn"><svg data-hf-id="hf-pdha" width="22" height="22" viewBox="0 0 24 24"><path data-hf-id="hf-e059" id="qRefTick" d="M5 12.5 L10 17 L19 7" fill="none" stroke="#1f8f5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>Referred · General Hospital</div></div>
+              <div data-hf-id="hf-vpkr" id="qTrack"><svg data-hf-id="hf-alrt" id="qTrackSvg" viewBox="0 0 372 40" />
+                <div data-hf-id="hf-yjoq" class="qtl" style="left:-0px">Detect</div><div data-hf-id="hf-sfzv" class="qtl" style="left:93px">Respond</div><div data-hf-id="hf-psjh" class="qtl" style="left:186px">Refer</div><div data-hf-id="hf-xt1y" class="qtl" style="left:279px">Follow up</div></div>
+              <div data-hf-id="hf-kws0" id="qFollow">Follow-up call booked for tomorrow</div>
+            </div>
+        <svg data-hf-id="hf-7itt" id="qCur" viewBox="0 0 34 40"><path data-hf-id="hf-vbiv" d="M3 2 L3 32 L11 25 L17 38 L23 35 L17 23 L28 23 Z" fill="#1d1d1f" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" /></svg>
+        <div data-hf-id="hf-8r2a" class="qrip" id="qRip"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 · what HerCova does: the word drum -->
+      <div data-hf-id="hf-vlgz" id="s6" class="clip" data-start="38.533" data-duration="8.75" data-track-index="8">
+        <svg data-hf-id="hf-lyij" id="dHyp" viewBox="0 0 1920 1080" />
+        <div data-hf-id="hf-trpc" id="dGlow"></div>
+        <div data-hf-id="hf-av9f" id="dStage"><div data-hf-id="hf-xwzr" id="dDrum" data-layout-allow-overlap=""></div></div>
+        <svg data-hf-id="hf-omzf" id="dArrow" viewBox="0 0 112 102"><path data-hf-id="hf-usd2" d="M6 51 H98 M56 9 L98 51 L56 93" fill="none" stroke="#c9a6f0" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </div>
+
+      <!-- 7 · a clinician (16-10) -->
+      <div data-hf-id="hf-bdt7" id="s7" class="clip" data-start="46.233" data-duration="8.6" data-track-index="9">
+        <div data-hf-id="hf-l5yi" id="tBgWrap"><img data-hf-id="hf-m6os" id="tBg" src="assets/stock/testi-bg.jpg" alt=""></div>
+        <div data-hf-id="hf-vwjp" id="tGlass"></div>
+        <div data-hf-id="hf-hvi5" id="tPlate">
+          <div data-hf-id="hf-5xwi" id="tQuoteMark">“</div>
+          <div data-hf-id="hf-4i01" id="tQuote"></div>
+          <div data-hf-id="hf-mvp5" id="tWho">
+            <div data-hf-id="hf-3ppf" id="tAva"><img data-hf-id="hf-py40" src="assets/stock/testi-ava.jpg" alt=""></div>
+            <div data-hf-id="hf-e6vy" id="tName"><span data-hf-id="hf-smev" class="ln"><span data-hf-id="hf-4hkg" class="w">Edidiong</span> <span data-hf-id="hf-lant" class="w">Bassey</span></span><span data-hf-id="hf-oupj" class="ln"><span data-hf-id="hf-dnqu" class="w">Reproductive</span> <span data-hf-id="hf-6o4u" class="w">health</span> <span data-hf-id="hf-h9fl" class="w">advocate</span></span></div>
+            <div data-hf-id="hf-3vvh" id="tHeart">
+              <svg data-hf-id="hf-4uw9" viewBox="0 0 34 32"><path data-hf-id="hf-n76c" d="M17 30 C6 22 2 16.2 2 11 C2 6.6 5.4 3 9.7 3 C12.8 3 15.4 4.8 17 7.5 C18.6 4.8 21.2 3 24.3 3 C28.6 3 32 6.6 32 11 C32 16.2 28 22 17 30 Z" fill="#ffffff" fill-opacity="0.5" id="tHeartGrey" /></svg>
+              <div data-hf-id="hf-mn38" id="tFillMask"><svg data-hf-id="hf-iel9" viewBox="0 0 34 32"><path data-hf-id="hf-6avi" d="M17 30 C6 22 2 16.2 2 11 C2 6.6 5.4 3 9.7 3 C12.8 3 15.4 4.8 17 7.5 C18.6 4.8 21.2 3 24.3 3 C28.6 3 32 6.6 32 11 C32 16.2 28 22 17 30 Z" fill="#ffffff" /></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 · care that reaches her, anywhere → the dot -->
+      <div data-hf-id="hf-fqls" id="s8" class="clip" data-start="53.333" data-duration="7.25" data-track-index="10">
+        <div data-hf-id="hf-m3w8" id="xWho">wherever she is.”</div>
+        <div data-hf-id="hf-04pl" class="kl" id="k3"></div>
+        <div data-hf-id="hf-albd" id="kDot"><i data-hf-id="hf-okwv"></i></div>
+      </div>
+
+      <!-- 9 · the end sting -->
+      <div data-hf-id="hf-aam2" id="s9" class="clip" data-start="59.833" data-duration="6.0" data-track-index="11">
+        <div data-hf-id="hf-perm" id="eWipeIn"></div>
+        <div data-hf-id="hf-u3x1" id="eMark"></div>
+        <div data-hf-id="hf-r4w5" id="eUrl"><span data-hf-id="hf-fqz4" id="eName">hercovahealth</span><span data-hf-id="hf-u4cz" id="eCom">com</span></div>
+        <div data-hf-id="hf-c50p" id="eTag">Care that reaches her, anywhere.</div>
+        <svg data-hf-id="hf-m4np" id="eSvg" viewBox="0 0 1920 1080"><rect data-hf-id="hf-95vo" id="eR" x="938" y="518" width="44" height="44" rx="22" fill="#c9a6f0" /></svg>
+        <div data-hf-id="hf-lizx" id="eWipeOut"></div>
+      </div>
+
+      <!-- the lens -->
+      <div data-hf-id="hf-jvgp" id="post" class="clip" data-start="0" data-duration="65.833" data-track-index="13">
+        <div data-hf-id="hf-xl8p" id="vig"></div>
+        <div data-hf-id="hf-f6d6" id="grain"></div>
+      </div>
+
+      <!-- AUDIO:BEGIN -->
+      <audio id="master" src="assets/audio/master.wav" data-start="0" data-duration="65.83333333333333" data-track-index="20" data-volume="1"></audio><!-- Starboy (instrumental, arranged pre-chorus) + 75 recorded SFX on the beat + Lily VO (6 lines, music ducked under her); mastered by scripts/mix_pro.py -->
+      <!-- AUDIO:END -->
+    </div>
+    <script src="film/film.js"></script>
+    <script>
+      window.__timelines["main"] = window.__buildHercova();
+    </script>
+    <script type="module" src="film/gl.js"></script>
+  </body>
+</html>
