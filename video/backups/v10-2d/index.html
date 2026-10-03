@@ -13,6 +13,13 @@
     <script src="assets/data/particles.js"></script>
     <script src="assets/data/mb_particles.js"></script>
     <script src="assets/data/silhouette.js"></script>
+    <script type="importmap">{ "imports": { "three": "./assets/vendor/three/three.module.js", "three/addons/": "./assets/vendor/three/addons/" } }</script>
+    <script>
+      // the 3D opening (scene3d.js, a module) builds after the DOM; hold the render until it has
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady.scene3d = new Promise((resolve) => { window.__hc3dReady = resolve; });
+    </script>
     <style>
       @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-400.woff2") format("woff2"); font-weight: 400; }
       @font-face { font-family: "Open Sauce One"; src: url("assets/fonts/open-sauce-one-500.woff2") format("woff2"); font-weight: 500; }
@@ -48,10 +55,10 @@
       /* 1 · heartbeat */
       #label1 { position: absolute; left: 0; right: 0; top: 842px; text-align: center; font-size: 18px; font-weight: 500; letter-spacing: 0.42em; color: rgb(22 20 26 / 0.5); white-space: pre; }
 
+      /* 1–4 · the 3D opening */
+      #gl { display: block; }
+
       /* 2 · her */
-      .photo { position: absolute; left: 1040px; top: 60px; width: 800px; height: 1000px; display: block; }
-      #subjectClip { position: absolute; inset: 0; clip-path: circle(0px at 1420px 550px); }
-      #big7 { position: absolute; left: 780px; top: 170px; width: 523px; height: 760px; }
       #timerChip { position: absolute; left: 1700px; top: 236px; padding: 12px 16px 10px; border-radius: 18px; background: #ffffff; box-shadow: 0 10px 30px -16px rgb(22 20 26 / 0.3), inset 0 0 0 1px #e8e6ec; text-align: center; opacity: 0; }
       #timerT { font-size: 30px; font-weight: 500; color: var(--ink); letter-spacing: 0.03em; font-variant-numeric: tabular-nums; }
       #timerU { font-size: 11px; letter-spacing: 0.36em; color: var(--mute); margin-top: 2px; }
@@ -240,18 +247,14 @@
       </div>
 
 
+      <!-- 1–4 · THE OPENING IN 3D: heartbeat, her, one of many, the dive (scene3d.js) -->
+      <div data-hf-id="hf-nwcl" id="s3d" class="clip" data-start="0" data-duration="10.1" data-track-index="1">
+        <canvas data-hf-id="hf-us9d" id="gl" class="fill"></canvas>
+      </div>
+
       <!-- 1 · HER HEARTBEAT: one line runs in on her heartbeat and draws her -->
       <div data-hf-id="hf-c6ek" id="s1" class="clip" data-start="0" data-duration="3.7" data-track-index="2">
        <div data-hf-id="hf-unba" id="rig1" class="fill">
-        <svg data-hf-id="hf-vmu1" id="svg1" class="fill" viewBox="0 0 1920 1080">
-          <path data-hf-id="hf-mgcm" id="ecg" fill="none" stroke="#7b2fa8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-          <path data-hf-id="hf-hw3h" id="silA" fill="none" stroke="#7b2fa8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          <path data-hf-id="hf-57u0" id="silB" fill="none" stroke="#7b2fa8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-          <circle data-hf-id="hf-nf0x" id="pen0" r="7" fill="#ffffff" stroke="#7b2fa8" stroke-width="3" opacity="0" />
-          <circle data-hf-id="hf-3g75" id="penA" r="6" fill="#ffffff" stroke="#7b2fa8" stroke-width="3" opacity="0" />
-          <circle data-hf-id="hf-p842" id="penB" r="6" fill="#ffffff" stroke="#7b2fa8" stroke-width="3" opacity="0" />
-          <g data-hf-id="hf-gvf6" id="heartDot" opacity="0"><circle data-hf-id="hf-bn78" r="17" fill="#ffffff" stroke="#e8e6ec" stroke-width="1.5" /><circle data-hf-id="hf-numh" r="10.5" fill="#ee7b1e" /></g>
-        </svg>
         <div data-hf-id="hf-yb3g" id="label1" class="mono"></div>
        </div>
       </div>
@@ -259,14 +262,6 @@
       <!-- 2 · HER: her photograph fills the drawing from her heart; the ring and the 7 -->
       <div data-hf-id="hf-bpu6" id="s2" class="clip" data-start="2.55" data-duration="4.2" data-track-index="3">
        <div data-hf-id="hf-qp79" id="rig2" class="fill">
-        <svg data-hf-id="hf-uxvp" id="ringBack" class="fill" viewBox="0 0 1920 1080" />
-        <svg data-hf-id="hf-g1ph" id="big7" viewBox="40 -775 560 790" aria-label="7">
-          
-          <path data-hf-id="hf-vfsa" id="big7fill" fill="#7b2fa8" opacity="0" />
-          <path data-hf-id="hf-4j01" id="big7stroke" fill="none" stroke="#7b2fa8" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" />
-        </svg>
-        <div data-hf-id="hf-3frt" id="subjectClip"><img data-hf-id="hf-0etk" id="photoSubject" class="photo" src="assets/images/graded/hero-subject.png" alt=""></div>
-        <svg data-hf-id="hf-6yq9" id="ringFront" class="fill" viewBox="0 0 1920 1080" />
         <div data-hf-id="hf-i848" id="timerChip" class="mono"><div data-hf-id="hf-pcli" id="timerT">00:00</div><div data-hf-id="hf-u62y" id="timerU">MINUTES</div></div>
        </div>
       </div>
@@ -280,19 +275,6 @@
         <div data-hf-id="hf-4qzx" id="tSub" class="ty"></div>
         <div data-hf-id="hf-kznh" id="tSrc" class="ty mono"><span data-hf-id="hf-dsrm" id="tSrcRule"></span>SOURCE · WHO AND PARTNERS, 2025</div>
        </div>
-      </div>
-
-      <!-- 3–4 · ONE OF MANY: particles become Nigeria; then the dive -->
-      <div data-hf-id="hf-0hn5" id="s3" class="clip" data-start="6.18" data-duration="3.95" data-track-index="5">
-        <canvas data-hf-id="hf-0oiu" id="parts" class="fill"></canvas>
-        <svg data-hf-id="hf-wy9n" id="svg3" class="fill" viewBox="0 0 1920 1080">
-          <g data-hf-id="hf-t9an" id="cam3">
-            <path data-hf-id="hf-8h9i" id="outline3" fill="none" stroke="rgb(22 20 26 / 0.28)" stroke-linejoin="round" />
-            <circle data-hf-id="hf-fy2l" id="lostRing" r="4.7" fill="none" stroke="rgb(22 20 26 / 0.6)" stroke-width="1.4" opacity="0" />
-            <circle data-hf-id="hf-naat" id="lostRipple" r="4.7" fill="none" stroke="rgb(22 20 26 / 0.4)" stroke-width="1.2" opacity="0" />
-            <g data-hf-id="hf-zmm7" id="her3"><circle data-hf-id="hf-oujg" r="7.5" fill="#ffffff" /><circle data-hf-id="hf-8z9y" r="4.74" fill="#ee7b1e" /></g>
-          </g>
-        </svg>
       </div>
 
       <!-- 5–8 · THE LINE OF CARE, HER PORTAL, THE CARE-TEAM CONSOLE -->
@@ -640,6 +622,7 @@
       <!-- AUDIO:END -->
     </div>
     <script src="film.js"></script>
+    <script type="module" src="scene3d.js"></script>
     <script>
       // film.js defines the build; run it once the DOM exists and register the one paused timeline.
       window.__timelines["main"] = window.__buildHercova();

@@ -2,11 +2,11 @@
  * HerCova — "The distance between her and care". The film's engine.
  *
  * RENDERED STATE (pure functions of composition time t, drawn once per frame by renderAll):
- *   backgrounds (SaaS grid, logo dots), the heartbeat line that draws her, the 3D clock ring, the
- *   particle hand-off, the map + dive camera, the line of care + world camera, camera punches,
- *   ring pulses, grain, the logo's glide into its lockup.
- * TIMELINE TWEENS (one paused GSAP timeline): type, the photograph's iris and pop-out, the
- *   portal UI, the console UI, the cursor, flash frames, the payoff, the end card.
+ *   the 3D opening (scene3d.js: heartbeat, her, the glass clock ring, the 7, the voxel map, the
+ *   crash zoom; driven from here), backgrounds (SaaS grid, logo dots), the line of care + world
+ *   camera, camera punches, ring pulses, grain, the logo's glide into its lockup.
+ * TIMELINE TWEENS (one paused GSAP timeline): type, the timer chip, the portal UI, the console UI,
+ *   the cursor, flash frames, the payoff, the end card.
  * Every time comes from timing.js; every word time from assets/audio/words.js.
  */
 window.__buildHercova = function () {
@@ -14,10 +14,6 @@ window.__buildHercova = function () {
 
   const T = window.HERCOVA_TIMING;
   const WORDS = window.HERCOVA_WORDS || {};
-  const NG = window.NIGERIA;
-  const G7 = window.GLYPH7;
-  const PARTS = window.HERCOVA_PARTICLES;
-  const SIL = window.HERCOVA_SILHOUETTE;
   const root = document.querySelector('[data-composition-id="main"]');
   const W = +root.dataset.width;
   const H = +root.dataset.height;
@@ -143,18 +139,6 @@ window.__buildHercova = function () {
   /* ======================================================================
      BACKGROUNDS · white and soft grey, a different stage for every scene
      ====================================================================== */
-  // her world: a flat grey disc that grows out of her heart, holds her, then holds the map
-  const DISC = { her: [1450, 612, 470], map: [1420, 600, 452] };
-  tl.fromTo('#herDisc', { attr: { cx: SIL.heart[0], cy: SIL.heart[1], r: 0 } }, { attr: { cx: DISC.her[0], cy: DISC.her[1], r: DISC.her[2] }, duration: S1.iris[1] - S1.iris[0] + 0.2, ease: 'expo.inOut' }, S1.iris[0] - 0.05);
-  tl.to('#herDisc', { attr: { cx: DISC.map[0], cy: DISC.map[1], r: DISC.map[2] }, duration: 0.9, ease: 'power3.inOut' }, S2.dissolve + 0.05);
-  [['#discRing1', 46], ['#discRing2', 104]].forEach(([id, off], i) => {
-    tl.fromTo(id, { attr: { cx: DISC.her[0], cy: DISC.her[1], r: DISC.her[2] - 30 }, opacity: 0 }, { attr: { r: DISC.her[2] + off }, opacity: 1, duration: 0.9, ease: 'expo.out' }, S1.iris[1] - 0.1 + i * 0.08);
-    tl.to(id, { attr: { cx: DISC.map[0], cy: DISC.map[1], r: DISC.map[2] + off }, duration: 0.9, ease: 'power3.inOut' }, S2.dissolve + 0.05);
-    tl.fromTo(id, { rotation: 0, svgOrigin: `${DISC.map[0]} ${DISC.map[1]}` }, { rotation: i ? -40 : 30, svgOrigin: `${DISC.map[0]} ${DISC.map[1]}`, duration: 6, ease: 'none' }, S1.iris[1]);
-  });
-  // the website's corner light, recut as a flat quarter disc
-  tl.fromTo('#corner', { attr: { r: 0 } }, { attr: { r: 430 }, duration: 0.9, ease: 'expo.out' }, S1.iris[1]);
-  tl.to('#corner', { attr: { r: 0 }, duration: 0.6, ease: 'power3.in' }, S2.dissolve + 0.1);
   // the dive lands inside her dot and her world of care floods the frame with the brand purple;
   // when she reaches care, a light lilac floods back out of her
   tl.fromTo('#stageIn', { attr: { r: 0 } }, { attr: { r: 1150 }, duration: 0.42, ease: 'power2.in' }, S4.dive[1] - 0.38);
@@ -163,24 +147,10 @@ window.__buildHercova = function () {
   // the frame's labels turn white on the purple and back
   tl.fromTo(['#hudTL', '#hudTR', '#hudBL'], { color: 'rgba(22,20,26,0.45)' }, { color: 'rgba(255,255,255,0.62)', duration: 0.3, immediateRender: false }, S4.dive[1] - 0.12);
   tl.to(['#hudTL', '#hudTR', '#hudBL'], { color: 'rgba(22,20,26,0.45)', duration: 0.3 }, S8.flyHome[0] + 0.2);
-  // the dive: her world rushes past the lens
-  tl.to(['#herDisc', '#discRing1', '#discRing2'], { opacity: 0, duration: 0.45, ease: 'power2.in' }, S4.dive[0] + 0.1);
-
-  // cartographic lines behind the map
-  const geo = $('#bgGeo');
-  const geoLines = [];
-  for (let i = 0; i < 12; i++) { const y = 250 + i * 64; geoLines.push(el('path', { d: `M880 ${y} Q 1420 ${y - 22 + (i - 6) * 2} 1960 ${y}`, fill: 'none', stroke: 'rgb(22 20 26 / 0.07)', 'stroke-width': 1.2 }, geo)); }
-  for (let i = 0; i < 13; i++) { const x = 900 + i * 80; geoLines.push(el('path', { d: `M${x} 220 Q ${x + (i - 6) * 6} 600 ${x} 1000`, fill: 'none', stroke: 'rgb(22 20 26 / 0.055)', 'stroke-width': 1.2 }, geo)); }
-  geoLines.forEach((p, i) => { const L = p.getTotalLength(); p.style.strokeDasharray = `${L} ${L}`; tl.fromTo(p, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, S3.fly[0] + 0.1 + (i % 13) * 0.04); });
-  tl.fromTo(geo, { opacity: 1 }, { opacity: 0, duration: 0.5, immediateRender: false }, S4.dive[0]);
-  tl.set(geo, { opacity: 1 }, 0);
-
-
   // the grid: a SaaS stage grid behind the product
   const gridCv = $('#bgGrid');
   gridCv.width = W * DPR; gridCv.height = H * DPR;
   const gctx2 = gridCv.getContext('2d');
-  const beats = T.heartbeat.beats.map((b) => T.heartbeat.at + b);
   function drawGrid(t) {
     gctx2.setTransform(DPR, 0, 0, DPR, 0, 0);
     gctx2.clearRect(0, 0, W, H);
@@ -201,63 +171,10 @@ window.__buildHercova = function () {
   }
 
   /* ======================================================================
-     1 · HER HEARTBEAT: one line runs in on her heartbeat and draws her
+     1 · HER HEARTBEAT: the label
      ====================================================================== */
+  // the heartbeat, her outline and her dot are 3D (scene3d.js); the label decodes over them
   const iris = S1.iris;
-  // the line reaches her, splits, and its two pens close her outline on the third beat
-  const OP = { reach: 0.95, close: beats[2], retract: [beats[2] + 0.04, beats[2] + 0.5], out: [iris[0] + 0.25, iris[1]] };
-  const X0 = -40;
-  const penX = (t) => lerp(X0, SIL.E[0], clamp(t / OP.reach));
-  const XC = penX(beats[0]); // the R wave lands exactly on the first heartbeat
-  function ecg(d) {
-    if (d < -150 || d > 200) return 0;
-    if (d < -100) return 16 * Math.sin((Math.PI * (d + 150)) / 50); // P
-    if (d < -40) return 0;
-    if (d < -28) return (-16 * (d + 40)) / 12;                      // Q
-    if (d < 0) return lerp(-16, 210, (d + 28) / 28);                 // R
-    if (d < 16) return lerp(210, -64, d / 16);                       // S
-    if (d < 34) return lerp(-64, 0, (d - 16) / 18);
-    if (d < 90) return 0;
-    return 34 * Math.sin((Math.PI * (d - 90)) / 110);               // T
-  }
-  const ECG = [];
-  for (let x = X0; x <= SIL.E[0]; x += 2) ECG.push([x, SIL.E[1] - ecg(x - XC)]);
-  const ecgEl = $('#ecg'), silA = $('#silA'), silB = $('#silB');
-  const pen0 = $('#pen0'), penA = $('#penA'), penB = $('#penB'), heartDot = $('#heartDot');
-  const LA = SIL.a.length, LB = SIL.b.length;
-  const pathOf = (P, n) => { let d = ''; for (let i = 0; i <= Math.min(P.length - 1, n); i++) d += (i ? 'L' : 'M') + P[i][0] + ' ' + P[i][1]; return d; };
-  function renderS1(t) {
-    // the trace, drawn up to its pen; once she is drawn it runs into her
-    const hx = penX(t), hy = SIL.E[1] - ecg(hx - XC);
-    const tx = lerp(X0, SIL.E[0], seg(t, OP.retract[0], OP.retract[1], 'power2.in'));
-    let d = '';
-    if (t > 0.01 && tx < SIL.E[0] - 2) {
-      for (const [x, y] of ECG) { if (x < tx) continue; if (x > hx) break; d += (d ? 'L' : 'M') + x + ' ' + y.toFixed(1); }
-      d += (d ? 'L' : 'M') + hx.toFixed(1) + ' ' + hy.toFixed(1);
-    }
-    ecgEl.setAttribute('d', d);
-    // two pens at the same speed: one over the gele and down her back, one down past her bump
-    const p = seg(t, OP.reach, OP.close, 'power1.inOut');
-    const nA = Math.round(p * (LA - 1)), nB = Math.round(Math.min(1, (p * LA) / LB) * (LB - 1));
-    silA.setAttribute('d', t > OP.reach ? pathOf(SIL.a, nA) : '');
-    silB.setAttribute('d', t > OP.reach ? pathOf(SIL.b, nB) : '');
-    const out = (1 - seg(t, OP.out[0], OP.out[1], 'power1.in')).toFixed(3);
-    [ecgEl, silA, silB].forEach((e) => e.setAttribute('opacity', out));
-    pen0.setAttribute('transform', `translate(${hx.toFixed(1)} ${hy.toFixed(1)})`);
-    pen0.setAttribute('opacity', t > 0.02 && t < OP.reach + 0.03 ? 1 : 0);
-    penA.setAttribute('transform', `translate(${SIL.a[nA][0]} ${SIL.a[nA][1]})`);
-    penA.setAttribute('opacity', t > OP.reach && t < OP.close + 0.06 ? 1 : 0);
-    penB.setAttribute('transform', `translate(${SIL.b[nB][0]} ${SIL.b[nB][1]})`);
-    penB.setAttribute('opacity', t > OP.reach && nB < LB - 1 ? 1 : 0);
-    // her dot, on her heart, the moment her outline closes; her photograph then fills from it
-    const k = t < OP.close ? 0 : POP.ease(clamp((t - OP.close) / POP.duration));
-    const beat = 1 + 0.2 * bump(t, beats[3], 0.05);
-    heartDot.setAttribute('transform', `translate(${SIL.heart[0]} ${SIL.heart[1]}) scale(${(k * beat).toFixed(4)})`);
-    heartDot.setAttribute('opacity', (1 - seg(t, iris[0] + 0.2, iris[0] + 0.45)).toFixed(3));
-  }
-  burst(beats[0] + 0.01, XC, SIL.E[1] - 210, 7, 0.5);
-  burst(OP.reach, SIL.E[0], SIL.E[1], 7, 0.55);
-  burst(OP.close, SIL.heart[0], SIL.heart[1], 14, 0.85);
   const LAB = 'SOMEWHERE IN NIGERIA';
   const GLY = '#%&*+=<>/|01ABCDEFHKMNRSTXZ';
   const lab = $('#label1');
@@ -277,78 +194,21 @@ window.__buildHercova = function () {
   }
 
   /* ======================================================================
-     2 · HER
+     2 · HER · the photograph, the glass clock ring and the 7 are 3D (scene3d.js);
+         the timer chip counts the ring's seven laps
      ====================================================================== */
-  const HEART = SIL.heart;
-  // her photograph fills the drawing from her heart outward, and stays where the line drew her
-  tl.fromTo('#subjectClip', { clipPath: `circle(0px at ${HEART[0]}px ${HEART[1]}px)` }, { clipPath: `circle(720px at ${HEART[0]}px ${HEART[1]}px)`, duration: 0.8, ease: 'expo.inOut' }, iris[0] - 0.05);
-  const pushDur = S2.dissolve - iris[1] + 0.3;
-  tl.to('#photoSubject', { scale: 1.06, duration: pushDur, ease: 'none', transformOrigin: `${HEART[0] - 1040}px ${HEART[1] - 60}px` }, iris[1] + 0.1);
-
-  ['#big7fill', '#big7stroke'].forEach((s) => $(s).setAttribute('d', G7.d));
-  const s7 = $('#big7stroke');
-  const S7L = s7.getTotalLength();
-  s7.style.strokeDasharray = `${S7L} ${S7L}`;
-  const sevenAt = wAt('vo1', 1);
-  tl.fromTo(s7, { strokeDashoffset: S7L }, { strokeDashoffset: 0, duration: 0.6, ease: 'power2.inOut' }, sevenAt - 0.12);
-  tl.fromTo('#big7fill', { opacity: 0 }, { opacity: 0.92, duration: 0.35, ease: 'power2.out' }, sevenAt + 0.3);
-  tl.fromTo(s7, { opacity: 1 }, { opacity: 0, duration: 0.3 }, sevenAt + 0.55);
-  tl.fromTo('#big7', { scale: 0.88, y: 30 }, { scale: 1, y: 0, duration: SOFT.duration, ease: SOFT.ease, transformOrigin: '50% 100%' }, sevenAt - 0.12);
-
-  const RING = { cx: 1490, cy: 770, rx: 430, ry: 92, rot: (-7 * Math.PI) / 180 };
-  const ringPt = (a, grow = 1) => {
-    const x = Math.cos(a) * RING.rx * grow, y = Math.sin(a) * RING.ry * grow;
-    return [RING.cx + x * Math.cos(RING.rot) - y * Math.sin(RING.rot), RING.cy + x * Math.sin(RING.rot) + y * Math.cos(RING.rot)];
-  };
-  const ringBack = $('#ringBack'), ringFront = $('#ringFront');
-  const ellipseD = (a0, a1) => { let d = ''; for (let i = 0; i <= 60; i++) { const [x, y] = ringPt(lerp(a0, a1, i / 60)); d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); } return d; };
-  const arcBack = el('path', { d: ellipseD(Math.PI, TAU), fill: 'none', stroke: 'rgb(22 20 26 / 0.18)', 'stroke-width': 1.6 }, ringBack);
-  const arcFront = el('path', { d: ellipseD(0, Math.PI), fill: 'none', stroke: 'rgb(22 20 26 / 0.4)', 'stroke-width': 2 }, ringFront);
-  [arcBack, arcFront].forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = `${L} ${L}`; p.style.strokeDashoffset = L; p.dataset.len = L; });
-  const ticksR = [];
-  for (let i = 0; i < 60; i++) {
-    const a = (i / 60) * TAU;
-    const [x1, y1] = ringPt(a, 1.0), [x2, y2] = ringPt(a, i % 5 === 0 ? 1.075 : 1.045);
-    const front = Math.sin(a) > 0;
-    ticksR.push(el('line', { x1, y1, x2, y2, stroke: front ? 'rgb(22 20 26 / 0.75)' : 'rgb(22 20 26 / 0.3)', 'stroke-width': i % 5 === 0 ? 2.6 : 1.6, 'stroke-linecap': 'round', opacity: 0 }, front ? ringFront : ringBack));
-  }
-  const cometB = [], cometF = [];
-  for (let i = 0; i < 16; i++) {
-    cometB.push(el('circle', { r: i ? 5.2 - i * 0.26 : 7, fill: '#7b2fa8', opacity: 0 }, ringBack));
-    cometF.push(el('circle', { r: i ? 5.2 - i * 0.26 : 7, fill: '#7b2fa8', opacity: 0 }, ringFront));
-  }
   const RW = S2.ring;
   const timerT = $('#timerT');
   let timerLast = '';
-  function renderS2(t) {
-    const out = 1 - seg(t, S2.dissolve, S2.dissolve + 0.3);
-    const rp = seg(t, RW[0], RW[0] + 0.7, 'power2.out');
-    [arcBack, arcFront].forEach((p) => { p.style.strokeDashoffset = (+p.dataset.len * (1 - rp)).toFixed(1); p.setAttribute('opacity', out.toFixed(3)); });
+  function renderTimer(t) {
     const q = seg(t, RW[0] + 0.15, RW[1], 'power3.inOut');
-    const qa = seg(t - 1 / 60, RW[0] + 0.15, RW[1], 'power3.inOut');
-    const ang = -Math.PI / 2 + q * 7 * TAU;
-    const spd = Math.abs(q - qa) * 7 * TAU * 60;
-    const lap = ((q * 7 * 60) % 60 + 60) % 60;
-    ticksR.forEach((tk, i) => {
-      const a = clamp(rp * 60 - i);
-      const lit = t > RW[0] && t < RW[1] + 0.4 ? Math.max(0, 1 - ((lap - ((i + 45) % 60) + 60) % 60) / 9) : 0;
-      tk.setAttribute('opacity', (a * (0.4 + 0.6 * lit) * out).toFixed(3));
-    });
-    const cOn = seg(t, RW[0] + 0.1, RW[0] + 0.35) * out;
-    for (let i = 0; i < 16; i++) {
-      const a = ang - i * clamp(0.02 + spd * 0.0024, 0.02, 0.1);
-      const [x, y] = ringPt(a, 1.02);
-      const front = Math.sin(a) > 0;
-      const alpha = cOn * (i ? 0.75 * (1 - i / 16) : 1);
-      [[cometB[i], !front], [cometF[i], front]].forEach(([c, show]) => { c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1)); c.setAttribute('opacity', show ? alpha.toFixed(3) : 0); });
-    }
     const secs = Math.round(q * 7 * 60);
     const s = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
     if (s !== timerLast) { timerT.textContent = s; timerLast = s; }
   }
   tl.fromTo('#timerChip', { opacity: 0, y: -10, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, RW[0]);
   tl.fromTo('#timerChip', { boxShadow: '0 0 0 0px rgba(22,20,26,0.25)' }, { keyframes: [{ boxShadow: '0 0 0 8px rgba(22,20,26,0.12)', duration: 0.12 }, { boxShadow: '0 0 0 14px rgba(22,20,26,0)', duration: 0.35 }], immediateRender: false }, RW[1]);
-  tl.to(['#subjectClip', '#timerChip', '#ringBack', '#ringFront'], { opacity: 0, duration: 0.28, ease: 'power1.in' }, S2.dissolve);
+  tl.to('#timerChip', { opacity: 0, duration: 0.28, ease: 'power1.in' }, S2.dissolve);
 
   /* ======================================================================
      TYPE · "Every 7 minutes," behind her, then re-set beside the map
@@ -371,114 +231,27 @@ window.__buildHercova = function () {
   tl.to(tEvery, { x: POSE3.every[0], y: POSE3.every[1], scale: POSE3.every[2], duration: RS[1] - RS[0], ease: 'power3.inOut' }, RS[0]);
   tl.to(tMin, { x: POSE3.min[0], y: POSE3.min[1], scale: POSE3.min[2], duration: RS[1] - RS[0], ease: 'power3.inOut' }, RS[0]);
   tl.to(tSub, { x: POSE3.sub[0], y: POSE3.sub[1], duration: RS[1] - RS[0], ease: 'power3.inOut' }, RS[0]);
-  tl.to('#big7', { x: 150 - 780 - 18, y: 356 - 170 - 50, scale: 0.13, duration: RS[1] - RS[0] - 0.1, ease: 'power3.inOut', transformOrigin: '0% 0%', immediateRender: false }, RS[0] - 0.02);
-  tl.to('#big7', { opacity: 0, duration: 0.2 }, RS[1] - 0.2);
   tl.fromTo(tSmall7, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power1.out' }, RS[1] - 0.22);
   tl.fromTo('#tSrcRule', { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: 'power3.inOut' }, 7.6);
   tl.fromTo(tSrc, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 7.66);
   tl.to([tEvery, tSmall7, tMin, tSub, tSrc], { x: '-=160', opacity: 0, filter: 'blur(14px)', duration: 0.42, ease: 'power3.in', stagger: 0.03 }, S3.typeOut);
 
   /* ======================================================================
-     3 · ONE OF MANY
+     3–4 · ONE OF MANY, THE DIVE · the studio is scene3d.js; the purple floods from her pearl
      ====================================================================== */
-  const MK = 0.7, MX = 1070, MY = 313;
-  const mapPt = (x, y) => [MX + x * MK, MY + y * MK];
-  const DOT_R = 6.77 * MK;
-  const herMap = mapPt(NG.her[0], NG.her[1]);
-  const lostMap = mapPt(NG.lost[0], NG.lost[1]);
-  const mdots = NG.dots.map(([x, y], i) => { const [sx, sy] = mapPt(x, y); return { x: sx, y: sy, i, her: Math.abs(x - NG.her[0]) < 0.5 && Math.abs(y - NG.her[1]) < 0.5, lost: Math.abs(x - NG.lost[0]) < 0.5 && Math.abs(y - NG.lost[1]) < 0.5 }; });
-  const pts = PARTS.pts.map(([x, y, r, col], i) => ({ x, y, r, rgb: hexRgb(col), i }));
-  const rowKey = (p) => Math.floor(p.y / 34) * 5000 + p.x;
-  const pSorted = [...pts].sort((a, b) => rowKey(a) - rowKey(b));
-  const mSorted = [...mdots].sort((a, b) => rowKey(a) - rowKey(b));
-  const herP = pts[PARTS.her];
-  const herM = mdots.find((m) => m.her);
-  const pairs = [];
-  const usedM = new Set([herM.i]);
-  let mi = 0;
-  let spare = 0;
-  for (const p of pSorted) {
-    if (p === herP) continue;
-    while (mi < mSorted.length && usedM.has(mSorted[mi].i)) mi++;
-    if (mi < mSorted.length) { usedM.add(mSorted[mi].i); pairs.push({ p, m: mSorted[mi] }); }
-    else { pairs.push({ p, m: mSorted[Math.floor(hash(spare++, 41) * mSorted.length)], spare: true }); }
-  }
-  const extraM = mdots.filter((m) => !usedM.has(m.i));
-  const END_RGB = hexRgb('#2a2730');
-  const FLY = S3.fly;
-  const flight = pairs.map(({ p, m, spare: sp }, k) => {
-    const dx = m.x - p.x, dy = m.y - p.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const sw = (hash(k, 3) - 0.5) * 2 * (60 + 160 * hash(k, 4));
-    return { p, m, cx: (p.x + m.x) / 2 - (dy / len) * sw + (hash(k, 5) - 0.5) * 40, cy: (p.y + m.y) / 2 + (dx / len) * sw + (hash(k, 6) - 0.5) * 40, d0: FLY[0] + 0.05 + 0.85 * hash(k, 7), dur: 0.9 + 0.35 * hash(k, 8), lost: m.lost && !sp, spare: !!sp };
-  });
-  const partsCv = $('#parts');
-  partsCv.width = W * DPR; partsCv.height = H * DPR;
-  const pctx = partsCv.getContext('2d');
-  const cam3 = track([
-    { t: 0, s: 1, x: CX, y: CY },
-    { t: S4.dive[0], s: 1.02, x: CX + 6, y: CY - 3, e: 'sine.inOut' },
-    { t: S4.dive[1], s: 30 / DOT_R, x: herMap[0], y: herMap[1], e: 'power3.inOut' },
-  ]);
-  const cam3El = $('#cam3');
-  const stageIn = $('#stageIn');
-  const outline3 = $('#outline3');
-  outline3.setAttribute('d', NG.outline);
-  outline3.setAttribute('transform', `translate(${MX} ${MY}) scale(${MK})`);
-  outline3.setAttribute('stroke-width', (1.4 / MK).toFixed(2));
-  const OUTL = outline3.getTotalLength();
-  outline3.style.strokeDasharray = `${OUTL} ${OUTL}`;
-  $('#lostRing').setAttribute('cx', lostMap[0]); $('#lostRing').setAttribute('cy', lostMap[1]);
-  $('#lostRipple').setAttribute('cx', lostMap[0]); $('#lostRipple').setAttribute('cy', lostMap[1]);
-  const her3 = $('#her3');
   const qb = (a, c, b, u) => { const v = 1 - u; return v * v * a + 2 * v * u * c + u * u * b; };
-  function renderS3(t) {
-    const c0 = cam3(t);
-    const c = { s: c0.s * punch(t), x: c0.x, y: c0.y };
-    cam3El.setAttribute('transform', camTsvg(c));
-    // the purple grows from exactly where her dot is on screen
-    stageIn.setAttribute('cx', (CX + c.s * (herMap[0] - c.x)).toFixed(1));
-    stageIn.setAttribute('cy', (CY + c.s * (herMap[1] - c.y)).toFixed(1));
-    pctx.setTransform(1, 0, 0, 1, 0, 0);
-    pctx.clearRect(0, 0, partsCv.width, partsCv.height);
-    pctx.setTransform(DPR * c.s, 0, 0, DPR * c.s, DPR * (CX - c.s * c.x), DPR * (CY - c.s * c.y));
-    const fadeIn = seg(t, S2.dissolve - 0.06, S2.dissolve + 0.12);
-    const dive = seg(t, S4.dive[0], S4.dive[0] + 0.55, 'power2.in');
-    const lostOut = seg(t, S3.lost, S3.lost + 0.7, 'power2.out');
-    for (let k = 0; k < flight.length; k++) {
-      const f = flight[k];
-      const u = ease('power3.inOut')(clamp((t - f.d0) / f.dur));
-      const ub = ease('power3.inOut')(clamp((t - 0.022 - f.d0) / f.dur));
-      const x = qb(f.p.x, f.cx, f.m.x, u), y = qb(f.p.y, f.cy, f.m.y, u);
-      const r = lerp(f.p.r, DOT_R, u);
-      const col = [0, 1, 2].map((j) => Math.round(lerp(f.p.rgb[j], END_RGB[j], clamp(u * 1.3))));
-      let a = fadeIn * lerp(1, 0.55 * (0.75 + 0.25 * Math.sin(t * 2 + k)), clamp(u * 1.2)) * (1 - dive);
-      if (f.lost) a *= 1 - lostOut;
-      if (f.spare) a *= 1 - clamp((u - 0.55) / 0.35);
-      if (a < 0.004) continue;
-      pctx.globalAlpha = a;
-      pctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
-      const vx = x - qb(f.p.x, f.cx, f.m.x, ub), vy = y - qb(f.p.y, f.cy, f.m.y, ub);
-      if (Math.hypot(vx, vy) > r * 0.8) {
-        pctx.strokeStyle = pctx.fillStyle; pctx.lineWidth = r * 2; pctx.lineCap = 'round';
-        pctx.beginPath(); pctx.moveTo(x - vx * 1.6, y - vy * 1.6); pctx.lineTo(x, y); pctx.stroke();
-      } else { pctx.beginPath(); pctx.arc(x, y, r, 0, TAU); pctx.fill(); }
-    }
-    const ex = seg(t, FLY[1] - 0.5, FLY[1] + 0.3) * (1 - dive);
-    if (ex > 0) { pctx.globalAlpha = ex * 0.5; pctx.fillStyle = 'rgb(42,39,48)'; for (const m of extraM) { pctx.beginPath(); pctx.arc(m.x, m.y, DOT_R, 0, TAU); pctx.fill(); } }
-    pctx.globalAlpha = 1;
-    partsCv.style.filter = dive > 0.02 ? `blur(${(dive * 6).toFixed(2)}px)` : 'none';
-    const hu = ease('power3.inOut')(clamp((t - (FLY[0] + 0.35)) / 1.35));
-    const hx = qb(herP.x, (herP.x + herM.x) / 2 + 40, herM.x, hu), hy = qb(herP.y, (herP.y + herM.y) / 2 - 120, herM.y, hu);
-    const hk = (t >= S2.dissolve ? 1 : 0) * (1 + 0.25 * bump(t, S3.lost + 0.28, 0.08) + 0.05 * Math.sin(t * 2.4));
-    her3.setAttribute('transform', `translate(${hx.toFixed(1)} ${hy.toFixed(1)}) scale(${(hk * lerp(1.5, 1, hu)).toFixed(3)})`);
-    const wide = 1 - seg(t, S4.dive[0], S4.dive[0] + 0.4, 'power2.in');
-    outline3.style.strokeDashoffset = (OUTL * (1 - seg(t, S3.outline[0], S3.outline[1], 'power2.inOut'))).toFixed(1);
-    outline3.setAttribute('opacity', wide.toFixed(3));
-    $('#lostRing').setAttribute('opacity', (lostOut * 0.85 * wide).toFixed(3));
-    const rip = clamp((t - S3.lost) / 1.3);
-    $('#lostRipple').setAttribute('r', (DOT_R * (1 + 6 * ease('expo.out')(rip))).toFixed(2));
-    $('#lostRipple').setAttribute('opacity', (t >= S3.lost ? 0.6 * (1 - rip) * wide : 0).toFixed(3));
+  const glCv = $('#gl');
+  const stageIn = $('#stageIn');
+  let maskLast = '';
+  function render3d(t) {
+    const gl = window.__hc3d;
+    if (!gl) return;
+    const { her } = gl.render(t, punch(t), punch(t - 1 / 60));
+    if (t > S4.dive[0]) { stageIn.setAttribute('cx', her[0].toFixed(1)); stageIn.setAttribute('cy', her[1].toFixed(1)); }
+    // the 3D frame opens where the purple grows, so the flood rises out of her pearl
+    const r = +stageIn.getAttribute('r');
+    const m = r > 0.5 ? `radial-gradient(circle ${r.toFixed(1)}px at ${stageIn.getAttribute('cx')}px ${stageIn.getAttribute('cy')}px, transparent 99.5%, #000 100%)` : 'none';
+    if (m !== maskLast) { glCv.style.maskImage = m; glCv.style.webkitMaskImage = m; maskLast = m; }
   }
 
   /* ======================================================================
@@ -960,9 +733,9 @@ window.__buildHercova = function () {
   function renderAll(t) {
     const k = punch(t);
     rigs.forEach(([e, a, b]) => { if (t > a && t < b) e.style.transform = `scale(${k.toFixed(4)})`; });
-    if (t < 3.8) { renderS1(t); renderLabel(t); }
-    if (t > 2.4 && t < 6.9) renderS2(t);
-    if (t > 6.0 && t < 10.3) renderS3(t);
+    if (t < 10.15) render3d(t);
+    if (t < 3.8) renderLabel(t);
+    if (t > 2.4 && t < 6.9) renderTimer(t);
     if (t > S5.handoff - 0.1 && t < S9.handoff + 0.3) renderB(t);
     if (t > S8.bloom[0] - 0.1 && t < S8.close[1] + 0.25) renderS8(t);
     if (t > S9.handoff - 0.2) renderLogo(t);
@@ -975,5 +748,6 @@ window.__buildHercova = function () {
   tl.fromTo(clock, { t: 0 }, { t: T.duration, duration: T.duration, ease: 'none', onUpdate: () => renderAll(clock.t) }, 0);
   renderB(S5.handoff);
   renderAll(0);
+  window.__hcRenderNow = () => renderAll(clock.t); // scene3d.js loads after the build and redraws the current frame
   return tl;
 };
